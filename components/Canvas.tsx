@@ -12,7 +12,6 @@ import ImageComponent from './ImageComponent';
 import VideoComponent from './VideoComponent';
 import GifComponent from './GifComponent';
 import LinkComponent from './LinkComponent';
-import ContinueButtonComponent from './ContinueButtonComponent';
 
 export default function Canvas() {
   const { 
@@ -46,8 +45,6 @@ export default function Canvas() {
         return <GifComponent key={component.id} component={component} index={index} />;
       case 'link':
         return <LinkComponent key={component.id} component={component} index={index} />;
-      case 'continueButton':
-        return <ContinueButtonComponent key={component.id} component={component} index={index} />;
       default:
         return null;
     }

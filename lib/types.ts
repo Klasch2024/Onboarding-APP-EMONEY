@@ -6,7 +6,7 @@ export interface Screen {
 
 export interface Component {
   id: string;
-  type: 'heading' | 'paragraph' | 'image' | 'gif' | 'video' | 'link' | 'continueButton';
+  type: 'heading' | 'paragraph' | 'image' | 'gif' | 'video' | 'link';
   content: ComponentContent;
   settings: ComponentSettings;
 }
@@ -39,19 +39,4 @@ export interface ComponentType {
   label: string;
   description: string;
   icon: string;
-}
-
-// User and role management
-export interface User {
-  id: string;
-  role: 'admin' | 'member';
-  name?: string;
-  email?: string;
-}
-
-export interface PublishedOnboarding {
-  id: string;
-  screens: Screen[];
-  publishedAt: string;
-  publishedBy: string;
 }

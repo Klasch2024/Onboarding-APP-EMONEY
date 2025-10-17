@@ -205,45 +205,6 @@ export default function ComponentEditor() {
           </div>
         );
 
-      case 'continueButton':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">Button Text</label>
-              <input
-                type="text"
-                value={component.content.text || ''}
-                onChange={(e) => handleUpdateContent('text', e.target.value)}
-                className="w-full p-3 bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg text-white placeholder-[#888888] focus:border-[#4a7fff] focus:outline-none"
-                placeholder="Enter button text..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">Alignment</label>
-              <div className="flex space-x-2">
-                {[
-                  { value: 'left', icon: AlignLeft },
-                  { value: 'center', icon: AlignCenter },
-                  { value: 'right', icon: AlignRight }
-                ].map(({ value, icon: Icon }) => (
-                  <button
-                    key={value}
-                    onClick={() => handleUpdateSettings('alignment', value)}
-                    className={cn(
-                      'p-2 rounded-lg border transition-colors',
-                      component.settings.alignment === value
-                        ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
-                        : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
       default:
         return null;
     }

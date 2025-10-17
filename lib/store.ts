@@ -1,15 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { OnboardingState, Screen, Component, User, PublishedOnboarding } from './types';
+import { OnboardingState, Screen, Component } from './types';
 
 interface OnboardingStore extends OnboardingState {
-  // User management
-  user: User | null;
-  isAdmin: boolean;
-  
-  // Published onboarding
-  publishedOnboarding: PublishedOnboarding | null;
-  
   // Screen management
   addScreen: () => void;
   selectScreen: (screenId: string) => void;
@@ -26,10 +19,6 @@ interface OnboardingStore extends OnboardingState {
   
   // Tab management
   setActiveTab: (tab: OnboardingState['activeTab']) => void;
-  
-  // User management actions
-  setUser: (user: User) => void;
-  publishOnboarding: () => void;
   
   // Utility
   getCurrentScreen: () => Screen | null;
@@ -50,11 +39,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
       currentScreenId: 'screen-1',
       selectedComponentId: null,
       activeTab: 'builder',
-      
-      // User management
-      user: null,
-      isAdmin: false,
-      publishedOnboarding: null,
 
       // Screen management
       addScreen: () => {
@@ -202,25 +186,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
         }
       },
 
-      // User management actions
-      setUser: (user: User) => {
-        set({ 
-          user, 
-          isAdmin: user.role === 'admin' 
-        });
-      },
-
-      publishOnboarding: () => {
-        const state = get();
-        const publishedOnboarding: PublishedOnboarding = {
-          id: `published-${Date.now()}`,
-          screens: state.screens,
-          publishedAt: new Date().toISOString(),
-          publishedBy: state.user?.id || 'unknown'
-        };
-        set({ publishedOnboarding });
-      },
-
       // Utility functions
       getCurrentScreen: () => {
         const state = get();
@@ -240,10 +205,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
       name: 'onboarding-store',
       partialize: (state) => ({
         screens: state.screens,
-        currentScreenId: state.currentScreenId,
-        user: state.user,
-        isAdmin: state.isAdmin,
-        publishedOnboarding: state.publishedOnboarding
+        currentScreenId: state.currentScreenId
       })
     }
   )
@@ -264,8 +226,6 @@ function getDefaultContent(type: Component['type']) {
       return { gifUrl: '' };
     case 'link':
       return { buttonText: 'Button Text', linkUrl: 'https://example.com' };
-    case 'continueButton':
-      return { text: 'Continue' };
     default:
       return {};
   }

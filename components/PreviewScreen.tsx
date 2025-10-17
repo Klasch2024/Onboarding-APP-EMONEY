@@ -7,7 +7,6 @@ import PreviewImageComponent from './PreviewImageComponent';
 import PreviewVideoComponent from './PreviewVideoComponent';
 import PreviewGifComponent from './PreviewGifComponent';
 import PreviewLinkComponent from './PreviewLinkComponent';
-import PreviewContinueButtonComponent from './PreviewContinueButtonComponent';
 
 export default function PreviewScreen() {
   const { getCurrentScreen, screens, currentScreenId, selectScreen } = useOnboardingStore();
@@ -45,14 +44,6 @@ export default function PreviewScreen() {
         return <PreviewGifComponent key={component.id} component={component} />;
       case 'link':
         return <PreviewLinkComponent key={component.id} component={component} />;
-      case 'continueButton':
-        return (
-          <PreviewContinueButtonComponent 
-            key={component.id} 
-            component={component} 
-            onContinue={handleContinue}
-          />
-        );
       default:
         return null;
     }

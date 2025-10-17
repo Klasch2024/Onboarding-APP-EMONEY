@@ -9,8 +9,7 @@ import {
   Image,
   Smile,
   Video,
-  Link,
-  ArrowRight
+  Link
 } from 'lucide-react';
 
 interface ComponentPickerProps {
@@ -55,12 +54,6 @@ const componentTypes: ComponentType[] = [
     label: 'Link Button',
     description: 'Add a clickable button with a link',
     icon: 'Link'
-  },
-  {
-    type: 'continueButton',
-    label: 'Continue Button',
-    description: 'Add a continue button for navigation',
-    icon: 'ArrowRight'
   }
 ];
 
@@ -70,8 +63,7 @@ const iconMap = {
   Image,
   Smile,
   Video,
-  Link,
-  ArrowRight
+  Link
 };
 
 export default function ComponentPicker({ 
