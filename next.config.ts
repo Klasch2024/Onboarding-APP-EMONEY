@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
 	images: {
 		remotePatterns: [{ hostname: "**" }],
 	},
+	output: 'standalone',
+	trailingSlash: true,
 };
 
 export default withWhopAppConfig(nextConfig);
