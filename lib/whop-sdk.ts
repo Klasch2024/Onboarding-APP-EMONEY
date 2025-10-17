@@ -1,23 +1,37 @@
 import { WhopServerSdk } from "@whop/api";
 
+/**
+ * Whop SDK Configuration
+ * 
+ * This file configures the Whop SDK for your app. The SDK handles:
+ * - User authentication and token verification
+ * - Access control (checking if users have access to experiences/companies)
+ * - User and company data retrieval
+ * - API requests to Whop services
+ * 
+ * All environment variables are loaded from your .env.local file
+ */
 export const whopSdk = WhopServerSdk({
-	// Add your app id here - this is required.
-	// You can get this from the Whop dashboard after creating an app section.
+	// Your Whop App ID - REQUIRED
+	// Get this from your Whop dashboard after creating an app
+	// This identifies your app to Whop's servers
 	appId: process.env.NEXT_PUBLIC_WHOP_APP_ID ?? "fallback",
 
-	// Add your app api key here - this is required.
-	// You can get this from the Whop dashboard after creating an app section.
+	// Your Whop API Key - REQUIRED  
+	// Get this from your Whop dashboard under Apps section
+	// This authenticates your app with Whop's API
 	appApiKey: process.env.WHOP_API_KEY ?? "fallback",
 
-	// This will make api requests on behalf of this user.
-	// This is optional, however most api requests need to be made on behalf of a user.
-	// You can create an agent user for your app, and use their userId here.
-	// You can also apply a different userId later with the `withUser` function.
+	// Agent User ID - OPTIONAL but recommended
+	// This is a Whop user ID that your app can control
+	// Most API requests need to be made on behalf of a user
+	// You can create a dedicated agent user for your app
+	// You can also change this later with the `withUser()` function
 	onBehalfOfUserId: process.env.NEXT_PUBLIC_WHOP_AGENT_USER_ID,
 
-	// This is the companyId that will be used for the api requests.
-	// When making api requests that query or mutate data about a company, you need to specify the companyId.
-	// This is optional, however if not specified certain requests will fail.
-	// This can also be applied later with the `withCompany` function.
+	// Company ID - OPTIONAL but recommended
+	// This is the Whop company ID for your organization
+	// Required for company-related API requests
+	// You can also change this later with the `withCompany()` function
 	companyId: process.env.NEXT_PUBLIC_WHOP_COMPANY_ID,
 });
