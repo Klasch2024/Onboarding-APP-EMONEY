@@ -100,11 +100,11 @@ export default function VideoComponent({ component, index }: VideoComponentProps
       }
       
       return (
-        <div className="w-full flex justify-center">
+        <div className="w-full">
           <iframe
             src={embedUrl}
-            className="rounded-lg"
-            style={{ height: '400px', maxWidth: '100%' }}
+            className="w-full rounded-lg"
+            style={{ height: '400px', width: '100%' }}
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
@@ -115,13 +115,13 @@ export default function VideoComponent({ component, index }: VideoComponentProps
     } else if (videoUrl) {
       // Handle uploaded videos
       return (
-        <div className="w-full flex justify-center">
+        <div className="w-full">
           <video 
             src={videoUrl} 
             controls
             autoPlay={settings.autoplay}
-            className="h-auto rounded-lg"
-            style={{ maxWidth: '100%', maxHeight: '400px' }}
+            className="w-full h-auto rounded-lg"
+            style={{ width: '100%', maxHeight: '400px' }}
             onError={(e) => {
               // Fallback if video fails to load
               const target = e.target as HTMLVideoElement;
