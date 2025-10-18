@@ -147,7 +147,7 @@ export default function ComponentEditor() {
                   value={component.content.videoEmbedUrl || ''}
                   onChange={(e) => handleUpdateContent('videoEmbedUrl', e.target.value)}
                   className="w-full p-3 bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg text-white placeholder-[#888888] focus:border-[#4a7fff] focus:outline-none"
-                  placeholder="https://www.youtube.com/embed/VIDEO_ID or https://player.vimeo.com/video/VIDEO_ID"
+                  placeholder="Paste YouTube embed URL, Vimeo embed URL, or full iframe HTML code"
                 />
                 <p className="text-xs text-[#888888] mt-1">
                   Paste the embed URL from YouTube, Vimeo, or other video platforms

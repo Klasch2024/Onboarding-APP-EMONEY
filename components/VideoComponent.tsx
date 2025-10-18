@@ -15,13 +15,38 @@ export default function VideoComponent({ component, index }: VideoComponentProps
   const videoUrl = content.videoUrl;
   const videoEmbedUrl = content.videoEmbedUrl;
 
+  // Extract embed URL from iframe HTML if needed
+  const getEmbedUrl = (url: string) => {
+    // If it's already a clean embed URL, return it
+    if (url.includes('youtube.com/embed/') || url.includes('player.vimeo.com/video/')) {
+      return url;
+    }
+    
+    // If it's iframe HTML, extract the src attribute
+    const srcMatch = url.match(/src="([^"]+)"/);
+    if (srcMatch) {
+      return srcMatch[1];
+    }
+    
+    // If it's a regular YouTube URL, convert to embed
+    if (url.includes('youtube.com/watch?v=')) {
+      const videoId = url.match(/v=([^&]+)/)?.[1];
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+    
+    return url;
+  };
+
   const renderVideo = () => {
     if (videoEmbedUrl) {
       // Handle embedded videos (YouTube, Vimeo, etc.)
+      const embedUrl = getEmbedUrl(videoEmbedUrl);
       return (
         <div className="w-full">
           <iframe
-            src={videoEmbedUrl}
+            src={embedUrl}
             className="w-full rounded-lg"
             style={{ height: '400px', maxWidth: '100%' }}
             frameBorder="0"
