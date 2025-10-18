@@ -15,25 +15,39 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
 
   // Extract embed URL from iframe HTML if needed
   const getEmbedUrl = (url: string) => {
+    console.log('Processing video URL:', url);
+    
     // If it's already a clean embed URL, return it
     if (url.includes('youtube.com/embed/') || url.includes('player.vimeo.com/video/')) {
+      console.log('Clean embed URL detected');
       return url;
     }
     
     // If it's iframe HTML, extract the src attribute
     const srcMatch = url.match(/src="([^"]+)"/);
     if (srcMatch) {
+      console.log('Extracted src from iframe:', srcMatch[1]);
       return srcMatch[1];
+    }
+    
+    // Handle URL-encoded iframe HTML
+    const decodedUrl = decodeURIComponent(url);
+    const decodedSrcMatch = decodedUrl.match(/src="([^"]+)"/);
+    if (decodedSrcMatch) {
+      console.log('Extracted src from decoded iframe:', decodedSrcMatch[1]);
+      return decodedSrcMatch[1];
     }
     
     // If it's a regular YouTube URL, convert to embed
     if (url.includes('youtube.com/watch?v=')) {
       const videoId = url.match(/v=([^&]+)/)?.[1];
       if (videoId) {
+        console.log('Converted YouTube URL to embed:', `https://www.youtube.com/embed/${videoId}`);
         return `https://www.youtube.com/embed/${videoId}`;
       }
     }
     
+    console.log('No valid embed URL found, returning original');
     return url;
   };
 
@@ -41,6 +55,19 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
     if (videoEmbedUrl) {
       // Handle embedded videos (YouTube, Vimeo, etc.)
       const embedUrl = getEmbedUrl(videoEmbedUrl);
+      console.log('Final embed URL:', embedUrl);
+      
+      // Validate that we have a proper embed URL
+      if (!embedUrl.startsWith('http')) {
+        console.error('Invalid embed URL:', embedUrl);
+        return (
+          <div className="w-full h-32 border-2 border-dashed border-red-500 rounded-lg flex flex-col items-center justify-center bg-red-500/5">
+            <p className="text-red-400 text-sm">Invalid video URL</p>
+            <p className="text-red-400 text-xs mt-1">Please use a valid YouTube or Vimeo embed URL</p>
+          </div>
+        );
+      }
+      
       return (
         <div className="w-full">
           <iframe
