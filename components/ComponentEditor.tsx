@@ -93,6 +93,8 @@ export default function ComponentEditor() {
         );
 
       case 'video':
+        const isEmbedMode = component.content.videoEmbedUrl !== undefined;
+        
         return (
           <div className="space-y-4">
             {/* Video Type Selection */}
@@ -101,12 +103,12 @@ export default function ComponentEditor() {
               <div className="flex space-x-2">
                 <button
                   onClick={() => {
-                    // Clear embed URL when switching to upload
+                    // Switch to upload mode
                     handleUpdateContent('videoEmbedUrl', undefined);
                   }}
                   className={cn(
                     'px-3 py-2 rounded-lg border transition-colors text-sm',
-                    component.content.videoEmbedUrl === undefined
+                    !isEmbedMode
                       ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
                       : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
                   )}
@@ -115,15 +117,13 @@ export default function ComponentEditor() {
                 </button>
                 <button
                   onClick={() => {
-                    // Clear upload URL when switching to embed and initialize embed URL
+                    // Switch to embed mode
                     handleUpdateContent('videoUrl', '');
-                    if (component.content.videoEmbedUrl === undefined) {
-                      handleUpdateContent('videoEmbedUrl', '');
-                    }
+                    handleUpdateContent('videoEmbedUrl', '');
                   }}
                   className={cn(
                     'px-3 py-2 rounded-lg border transition-colors text-sm',
-                    component.content.videoEmbedUrl !== undefined
+                    isEmbedMode
                       ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
                       : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
                   )}
@@ -134,7 +134,7 @@ export default function ComponentEditor() {
             </div>
 
             {/* Upload Video Option */}
-            {component.content.videoEmbedUrl === undefined && (
+            {!isEmbedMode && (
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Upload Video</label>
                 <ImageUpload 
@@ -147,7 +147,7 @@ export default function ComponentEditor() {
             )}
 
             {/* Embed Video Option */}
-            {component.content.videoEmbedUrl !== undefined && (
+            {isEmbedMode && (
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Embed Video URL</label>
                 <input
