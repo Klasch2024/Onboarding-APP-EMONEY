@@ -23,8 +23,8 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
       return url;
     }
     
-    // If it's iframe HTML, extract the src attribute
-    const srcMatch = url.match(/src="([^"]+)"/);
+    // If it's iframe HTML, extract the src attribute with more flexible regex
+    const srcMatch = url.match(/src=["']([^"']+)["']/);
     if (srcMatch) {
       console.log('Extracted src from iframe:', srcMatch[1]);
       return srcMatch[1];
@@ -32,7 +32,7 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
     
     // Handle URL-encoded iframe HTML
     const decodedUrl = decodeURIComponent(url);
-    const decodedSrcMatch = decodedUrl.match(/src="([^"]+)"/);
+    const decodedSrcMatch = decodedUrl.match(/src=["']([^"']+)["']/);
     if (decodedSrcMatch) {
       console.log('Extracted src from decoded iframe:', decodedSrcMatch[1]);
       return decodedSrcMatch[1];
@@ -41,7 +41,7 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
     // Handle URL-encoded iframe HTML with different encoding
     try {
       const doubleDecodedUrl = decodeURIComponent(decodeURIComponent(url));
-      const doubleDecodedSrcMatch = doubleDecodedUrl.match(/src="([^"]+)"/);
+      const doubleDecodedSrcMatch = doubleDecodedUrl.match(/src=["']([^"']+)["']/);
       if (doubleDecodedSrcMatch) {
         console.log('Extracted src from double-decoded iframe:', doubleDecodedSrcMatch[1]);
         return doubleDecodedSrcMatch[1];
