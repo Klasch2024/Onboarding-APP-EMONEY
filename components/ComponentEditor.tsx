@@ -15,6 +15,7 @@ export default function ComponentEditor() {
   } = useOnboardingStore();
   
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [videoMode, setVideoMode] = useState<'upload' | 'embed'>('upload');
   
   const component = getSelectedComponent();
   
@@ -93,8 +94,6 @@ export default function ComponentEditor() {
         );
 
       case 'video':
-        const isEmbedMode = component.content.videoEmbedUrl !== undefined;
-        
         return (
           <div className="space-y-4">
             {/* Video Type Selection */}
@@ -102,13 +101,10 @@ export default function ComponentEditor() {
               <label className="block text-sm font-medium text-white mb-2">Video Type</label>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => {
-                    // Switch to upload mode
-                    handleUpdateContent('videoEmbedUrl', undefined);
-                  }}
+                  onClick={() => setVideoMode('upload')}
                   className={cn(
                     'px-3 py-2 rounded-lg border transition-colors text-sm',
-                    !isEmbedMode
+                    videoMode === 'upload'
                       ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
                       : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
                   )}
@@ -116,14 +112,10 @@ export default function ComponentEditor() {
                   Upload Video
                 </button>
                 <button
-                  onClick={() => {
-                    // Switch to embed mode
-                    handleUpdateContent('videoUrl', '');
-                    handleUpdateContent('videoEmbedUrl', '');
-                  }}
+                  onClick={() => setVideoMode('embed')}
                   className={cn(
                     'px-3 py-2 rounded-lg border transition-colors text-sm',
-                    isEmbedMode
+                    videoMode === 'embed'
                       ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
                       : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
                   )}
@@ -134,7 +126,7 @@ export default function ComponentEditor() {
             </div>
 
             {/* Upload Video Option */}
-            {!isEmbedMode && (
+            {videoMode === 'upload' && (
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Upload Video</label>
                 <ImageUpload 
@@ -147,7 +139,7 @@ export default function ComponentEditor() {
             )}
 
             {/* Embed Video Option */}
-            {isEmbedMode && (
+            {videoMode === 'embed' && (
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Embed Video URL</label>
                 <input
