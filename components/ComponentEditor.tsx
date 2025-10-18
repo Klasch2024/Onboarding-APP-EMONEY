@@ -102,11 +102,11 @@ export default function ComponentEditor() {
                 <button
                   onClick={() => {
                     // Clear embed URL when switching to upload
-                    handleUpdateContent('videoEmbedUrl', '');
+                    handleUpdateContent('videoEmbedUrl', undefined);
                   }}
                   className={cn(
                     'px-3 py-2 rounded-lg border transition-colors text-sm',
-                    !component.content.videoEmbedUrl
+                    component.content.videoEmbedUrl === undefined
                       ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
                       : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
                   )}
@@ -117,7 +117,9 @@ export default function ComponentEditor() {
                   onClick={() => {
                     // Clear upload URL when switching to embed and initialize embed URL
                     handleUpdateContent('videoUrl', '');
-                    handleUpdateContent('videoEmbedUrl', '');
+                    if (component.content.videoEmbedUrl === undefined) {
+                      handleUpdateContent('videoEmbedUrl', '');
+                    }
                   }}
                   className={cn(
                     'px-3 py-2 rounded-lg border transition-colors text-sm',
