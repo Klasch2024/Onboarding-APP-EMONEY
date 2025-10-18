@@ -15,6 +15,7 @@ export interface ComponentContent {
   text?: string;
   imageUrl?: string;
   videoUrl?: string;
+  videoEmbedUrl?: string;
   gifUrl?: string;
   buttonText?: string;
   linkUrl?: string;

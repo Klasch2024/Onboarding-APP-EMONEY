@@ -95,15 +95,75 @@ export default function ComponentEditor() {
       case 'video':
         return (
           <div className="space-y-4">
+            {/* Video Type Selection */}
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Upload Video</label>
-              <ImageUpload 
-                currentImageUrl={component.content.videoUrl}
-                onImageUpload={(videoUrl) => handleUpdateContent('videoUrl', videoUrl)}
-                accept="video/*"
-                label="Upload video"
-              />
+              <label className="block text-sm font-medium text-white mb-2">Video Type</label>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => {
+                    // Clear embed URL when switching to upload
+                    if (component.content.videoEmbedUrl) {
+                      handleUpdateContent('videoEmbedUrl', '');
+                    }
+                  }}
+                  className={cn(
+                    'px-3 py-2 rounded-lg border transition-colors text-sm',
+                    !component.content.videoEmbedUrl
+                      ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
+                      : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
+                  )}
+                >
+                  Upload Video
+                </button>
+                <button
+                  onClick={() => {
+                    // Clear upload URL when switching to embed
+                    if (component.content.videoUrl) {
+                      handleUpdateContent('videoUrl', '');
+                    }
+                  }}
+                  className={cn(
+                    'px-3 py-2 rounded-lg border transition-colors text-sm',
+                    component.content.videoEmbedUrl
+                      ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
+                      : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
+                  )}
+                >
+                  Embed Video
+                </button>
+              </div>
             </div>
+
+            {/* Upload Video Option */}
+            {!component.content.videoEmbedUrl && (
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Upload Video</label>
+                <ImageUpload 
+                  currentImageUrl={component.content.videoUrl}
+                  onImageUpload={(videoUrl) => handleUpdateContent('videoUrl', videoUrl)}
+                  accept="video/*"
+                  label="Upload video"
+                />
+              </div>
+            )}
+
+            {/* Embed Video Option */}
+            {component.content.videoEmbedUrl && (
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Embed Video URL</label>
+                <input
+                  type="url"
+                  value={component.content.videoEmbedUrl || ''}
+                  onChange={(e) => handleUpdateContent('videoEmbedUrl', e.target.value)}
+                  className="w-full p-3 bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg text-white placeholder-[#888888] focus:border-[#4a7fff] focus:outline-none"
+                  placeholder="https://www.youtube.com/embed/VIDEO_ID or https://player.vimeo.com/video/VIDEO_ID"
+                />
+                <p className="text-xs text-[#888888] mt-1">
+                  Paste the embed URL from YouTube, Vimeo, or other video platforms
+                </p>
+              </div>
+            )}
+
             <div>
               <label className="flex items-center space-x-2">
                 <input
