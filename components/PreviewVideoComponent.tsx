@@ -30,6 +30,13 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
       return srcMatch[1];
     }
     
+    // Try with more specific regex for your exact format
+    const specificMatch = url.match(/src="([^"]+)"/);
+    if (specificMatch) {
+      console.log('Extracted src with specific regex:', specificMatch[1]);
+      return specificMatch[1];
+    }
+    
     // Handle URL-encoded iframe HTML
     const decodedUrl = decodeURIComponent(url);
     const decodedSrcMatch = decodedUrl.match(/src=["']([^"']+)["']/);
