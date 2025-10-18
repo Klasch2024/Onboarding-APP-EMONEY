@@ -98,10 +98,10 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
       }
       
       return (
-        <div className="w-full">
+        <div className="w-full flex justify-center">
           <iframe
             src={embedUrl}
-            className="w-full rounded-lg"
+            className="rounded-lg"
             style={{ height: '400px', maxWidth: '100%' }}
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -113,18 +113,20 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
     } else if (videoUrl) {
       // Handle uploaded videos
       return (
-        <video 
-          src={videoUrl} 
-          controls
-          autoPlay={settings.autoplay}
-          className="h-auto rounded-lg"
-          style={{ maxWidth: '100%', maxHeight: '400px' }}
-          onError={(e) => {
-            // Fallback if video fails to load
-            const target = e.target as HTMLVideoElement;
-            target.style.display = 'none';
-          }}
-        />
+        <div className="w-full flex justify-center">
+          <video 
+            src={videoUrl} 
+            controls
+            autoPlay={settings.autoplay}
+            className="h-auto rounded-lg"
+            style={{ maxWidth: '100%', maxHeight: '400px' }}
+            onError={(e) => {
+              // Fallback if video fails to load
+              const target = e.target as HTMLVideoElement;
+              target.style.display = 'none';
+            }}
+          />
+        </div>
       );
     }
     return null;

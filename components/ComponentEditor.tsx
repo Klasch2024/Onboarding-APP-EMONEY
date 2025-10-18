@@ -166,29 +166,6 @@ export default function ComponentEditor() {
                 <span className="text-sm text-white">Enable Autoplay</span>
               </label>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">Alignment</label>
-              <div className="flex space-x-2">
-                {[
-                  { value: 'left', icon: AlignLeft },
-                  { value: 'center', icon: AlignCenter },
-                  { value: 'right', icon: AlignRight }
-                ].map(({ value, icon: Icon }) => (
-                  <button
-                    key={value}
-                    onClick={() => handleUpdateSettings('alignment', value)}
-                    className={cn(
-                      'p-2 rounded-lg border transition-colors',
-                      component.settings.alignment === value
-                        ? 'bg-[#4a7fff] border-[#4a7fff] text-white'
-                        : 'bg-[#2a2a2a] border-[#3a3a3a] text-[#888888] hover:border-[#4a7fff]'
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         );
 
