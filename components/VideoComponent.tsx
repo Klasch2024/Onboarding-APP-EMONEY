@@ -40,6 +40,25 @@ export default function VideoComponent({ component, index }: VideoComponentProps
       return decodedSrcMatch[1];
     }
     
+    // Handle URL-encoded iframe HTML with different encoding
+    try {
+      const doubleDecodedUrl = decodeURIComponent(decodeURIComponent(url));
+      const doubleDecodedSrcMatch = doubleDecodedUrl.match(/src="([^"]+)"/);
+      if (doubleDecodedSrcMatch) {
+        console.log('Extracted src from double-decoded iframe:', doubleDecodedSrcMatch[1]);
+        return doubleDecodedSrcMatch[1];
+      }
+    } catch (e) {
+      console.log('Double decode failed:', e);
+    }
+    
+    // Handle iframe HTML with different quote styles
+    const singleQuoteMatch = url.match(/src='([^']+)'/);
+    if (singleQuoteMatch) {
+      console.log('Extracted src from single-quoted iframe:', singleQuoteMatch[1]);
+      return singleQuoteMatch[1];
+    }
+    
     // If it's a regular YouTube URL, convert to embed
     if (url.includes('youtube.com/watch?v=')) {
       const videoId = url.match(/v=([^&]+)/)?.[1];
