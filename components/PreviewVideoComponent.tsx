@@ -71,6 +71,8 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
   };
 
   const renderVideo = () => {
+    console.log('PreviewVideoComponent renderVideo called with:', { videoEmbedUrl, videoUrl });
+    
     if (videoEmbedUrl) {
       // Handle embedded videos (YouTube, Vimeo, etc.)
       const embedUrl = getEmbedUrl(videoEmbedUrl);
@@ -83,6 +85,7 @@ export default function PreviewVideoComponent({ component }: PreviewVideoCompone
           <div className="w-full h-32 border-2 border-dashed border-red-500 rounded-lg flex flex-col items-center justify-center bg-red-500/5">
             <p className="text-red-400 text-sm">Invalid video URL</p>
             <p className="text-red-400 text-xs mt-1">Please use a valid YouTube or Vimeo embed URL</p>
+            <p className="text-red-400 text-xs mt-1">Debug: {embedUrl}</p>
           </div>
         );
       }
