@@ -8,10 +8,6 @@ const nextConfig: NextConfig = {
 	},
 	output: 'standalone',
 	trailingSlash: true,
-	// Ensure proper handling of Whop SDK
-	experimental: {
-		serverComponentsExternalPackages: ['@whop/api', '@whop/react'],
-	},
 	// Add proper headers for Whop integration
 	async headers() {
 		return [
