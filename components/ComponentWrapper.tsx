@@ -6,7 +6,7 @@ import { GripVertical } from 'lucide-react';
 import { useOnboardingStore } from '@/lib/store';
 import { motion } from 'framer-motion';
 import { useDrag, useDrop } from 'react-dnd';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
 interface ComponentWrapperProps {
@@ -25,8 +25,15 @@ export default function ComponentWrapper({
   const { selectedComponentId, selectComponent, reorderComponents } = useOnboardingStore();
   const isSelected = selectedComponentId === component.id;
   const dragRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const [{ isDragging }, drag, preview] = useDrag({
+  // Ensure component is mounted before using drag and drop
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Only initialize drag and drop on client side
+  const dragDropResult = isMounted ? useDrag({
     type: 'component',
     item: () => {
       return { id: component.id, index };
@@ -37,14 +44,18 @@ export default function ComponentWrapper({
     end: (item, monitor) => {
       // Reset any visual states when drag ends
     },
-  });
+  }) : [{ isDragging: false }, () => {}, () => {}];
+
+  const [{ isDragging }, drag, preview] = dragDropResult;
 
   // Custom drag preview
   useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
-  }, [preview]);
+    if (isMounted) {
+      preview(getEmptyImage(), { captureDraggingState: true });
+    }
+  }, [preview, isMounted]);
 
-  const [{ isOver, canDrop }, drop] = useDrop({
+  const dropResult = isMounted ? useDrop({
     accept: 'component',
     hover: (draggedItem: { id: string; index: number }, monitor) => {
       if (!draggedItem || draggedItem.id === component.id) {
@@ -87,11 +98,37 @@ export default function ComponentWrapper({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
-  });
+  }) : [{ isOver: false, canDrop: false }, () => {}];
 
-  // Connect drag and drop refs
-  drag(dragRef);
-  drop(dragRef);
+  const [{ isOver, canDrop }, drop] = dropResult;
+
+  // Connect drag and drop refs only when mounted
+  useEffect(() => {
+    if (isMounted) {
+      drag(dragRef);
+      drop(dragRef);
+    }
+  }, [drag, drop, isMounted]);
+
+  // Don't render drag and drop features until mounted to prevent hydration issues
+  if (!isMounted) {
+    return (
+      <div
+        className={cn(
+          'group relative bg-[#2a2a2a] border-2 rounded-lg transition-all duration-200 cursor-pointer',
+          isSelected
+            ? 'border-[#4a7fff] shadow-lg shadow-[#4a7fff]/20'
+            : 'border-transparent hover:border-[#4a7fff]/50',
+          className
+        )}
+        onClick={() => selectComponent(component.id)}
+      >
+        <div className="p-4">
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
