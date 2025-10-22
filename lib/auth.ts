@@ -1,4 +1,4 @@
-import { whopSdk } from './whop-sdk';
+// import { whopSdk } from './whop-sdk'; // Temporarily disabled for deployment compatibility
 
 export interface UserPermissions {
   isAdmin: boolean;
@@ -8,8 +8,9 @@ export interface UserPermissions {
 }
 
 /**
- * Check user permissions using Whop SDK
+ * Check user permissions using simplified authentication
  * This function verifies if a user has admin access to a company
+ * Note: Currently using mock implementation for deployment compatibility
  */
 export async function checkUserPermissions(userId: string, companyId: string): Promise<UserPermissions> {
   try {
