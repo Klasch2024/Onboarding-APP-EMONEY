@@ -1,5 +1,3 @@
-// import { whopSdk } from './whop-sdk'; // Temporarily disabled for deployment compatibility
-
 export interface UserPermissions {
   isAdmin: boolean;
   isMember: boolean;
@@ -56,7 +54,7 @@ export async function isUserAdmin(userId: string, companyId: string): Promise<bo
 }
 
 /**
- * Get user information from Whop SDK
+ * Get user information from simplified authentication
  */
 export async function getUserInfo(userId: string) {
   try {
