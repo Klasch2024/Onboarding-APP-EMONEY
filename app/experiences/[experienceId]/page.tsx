@@ -6,15 +6,20 @@ import PreviewScreen from '@/components/PreviewScreen';
 /**
  * Experience Page Component
  * 
- * This page implements Whop access control using the official SDK method.
- * Uses whopSdk.access.checkIfUserHasAccessToExperience() to determine access level.
+ * This page implements exact Whop access control logic using the official SDK method.
+ * Uses whopSdk.access.checkIfUserHasAccessToExperience(userId, experienceId) to determine access level.
  * 
- * Access levels based on Whop documentation:
- * - "admin": Company administrators → redirect to /dashboard/default
- * - "customer" + hasAccess: true: Regular paying members → show onboarding experience
- * - "no_access" or no access: Users without access → redirect to /unauthorized
+ * Whop access levels:
+ * 1. "admin" - Company administrators who manage the whop
+ *    → Redirect to /dashboard/default to build onboarding experiences
  * 
- * Reference: Whop Experience View documentation pattern
+ * 2. "customer" - Regular paying members who have purchased access
+ *    → Show onboarding experience page (if hasAccess === true)
+ * 
+ * 3. "no_access" - Users without access
+ *    → Redirect to /unauthorized
+ * 
+ * Implementation follows exact Whop SDK pattern for experience access control.
  */
 export default async function ExperiencePage({
 	params,
@@ -38,18 +43,18 @@ export default async function ExperiencePage({
 		
 		console.log('User access to experience:', access);
 		
-		// Handle different access levels based on Whop documentation
+		// Implement exact Whop access control logic
 		if (access.accessLevel === "admin") {
-			console.log('Admin user accessing experience, redirecting to admin dashboard');
-			// Admin users should be redirected to admin dashboard
+			console.log('Admin user detected, redirecting to dashboard for building experiences');
+			// Admin users should be redirected to dashboard to build onboarding experiences
 			redirect('/dashboard/default');
 		} else if (access.accessLevel === "customer" && access.hasAccess === true) {
-			console.log('Customer user with access, showing onboarding experience');
-			// Customer users with access can view the onboarding experience
+			console.log('Customer user with valid access, showing onboarding experience');
+			// Customer users with valid access can view the onboarding experience
 			return <PreviewScreen />;
 		} else {
-			console.log('User does not have access to experience, redirecting to unauthorized');
-			// No access or invalid access level - redirect to unauthorized
+			console.log('User has no access or invalid access level, redirecting to unauthorized');
+			// All other users (no_access, customer without access, etc.) should be redirected to unauthorized
 			redirect('/unauthorized');
 		}
 	} catch (error) {
