@@ -1,37 +1,55 @@
+import { whopSdk } from './whop-sdk';
+
 export interface UserPermissions {
   isAdmin: boolean;
   isMember: boolean;
   user: any;
   company: any;
+  accessLevel: string | null;
 }
 
 /**
- * Check user permissions using simplified authentication
- * This function verifies if a user has admin access to a company
- * Note: Currently using mock implementation for deployment compatibility
+ * Check user permissions using Whop SDK
+ * This function verifies if a user has access to a company and their access level
  */
 export async function checkUserPermissions(userId: string, companyId: string): Promise<UserPermissions> {
   try {
-    // For now, we'll implement a simplified permission check
-    // In a real implementation, you would use the Whop SDK to check user roles
-    
     // Check if we're in development mode
     if (process.env.NODE_ENV === 'development') {
       return {
         isAdmin: true,
         isMember: true,
         user: { id: userId, username: 'dev-user' },
-        company: { id: companyId, name: 'dev-company' }
+        company: { id: companyId, name: 'dev-company' },
+        accessLevel: 'admin'
       };
     }
     
-    // In production, you would implement proper Whop SDK calls here
-    // For now, we'll return a basic structure that allows access
+    // Use Whop SDK to check user access to company
+    const access = await whopSdk.access.checkIfUserHasAccessToCompany({
+      companyId: companyId,
+      userId: userId,
+    });
+    
+    if (!access.hasAccess) {
+      return {
+        isAdmin: false,
+        isMember: false,
+        user: null,
+        company: null,
+        accessLevel: null
+      };
+    }
+    
+    const isAdmin = access.accessLevel === 'admin';
+    const isMember = access.hasAccess; // If user has access, they are a member
+    
     return {
-      isAdmin: true, // Temporarily allow all users in production
-      isMember: true,
-      user: { id: userId, username: 'user' },
-      company: { id: companyId, name: 'company' }
+      isAdmin,
+      isMember,
+      user: { id: userId },
+      company: { id: companyId },
+      accessLevel: access.accessLevel
     };
   } catch (error) {
     console.error('Permission check failed:', error);
@@ -39,7 +57,8 @@ export async function checkUserPermissions(userId: string, companyId: string): P
       isAdmin: false, 
       isMember: false, 
       user: null, 
-      company: null 
+      company: null,
+      accessLevel: null
     };
   }
 }
