@@ -6,13 +6,15 @@ import PreviewScreen from '@/components/PreviewScreen';
 /**
  * Experience Page Component
  * 
- * This page implements user access control using Whop SDK.
- * Uses checkIfUserHasAccessToExperience to determine access level.
+ * This page implements Whop access control using the official SDK method.
+ * Uses whopSdk.access.checkIfUserHasAccessToExperience() to determine access level.
  * 
- * Access levels:
- * - "admin": Company admins (should see admin dashboard)
- * - "customer": Regular members (should see onboarding page)
- * - "no_access": No access (redirect to unauthorized)
+ * Access levels based on Whop documentation:
+ * - "admin": Company administrators → redirect to /dashboard/default
+ * - "customer" + hasAccess: true: Regular paying members → show onboarding experience
+ * - "no_access" or no access: Users without access → redirect to /unauthorized
+ * 
+ * Reference: Whop Experience View documentation pattern
  */
 export default async function ExperiencePage({
 	params,
@@ -36,18 +38,18 @@ export default async function ExperiencePage({
 		
 		console.log('User access to experience:', access);
 		
-		// Handle different access levels
+		// Handle different access levels based on Whop documentation
 		if (access.accessLevel === "admin") {
 			console.log('Admin user accessing experience, redirecting to admin dashboard');
 			// Admin users should be redirected to admin dashboard
 			redirect('/dashboard/default');
-		} else if (access.hasAccess) {
-			console.log('User has access to experience, showing onboarding');
-			// Regular users with access can view the onboarding experience
+		} else if (access.accessLevel === "customer" && access.hasAccess === true) {
+			console.log('Customer user with access, showing onboarding experience');
+			// Customer users with access can view the onboarding experience
 			return <PreviewScreen />;
 		} else {
 			console.log('User does not have access to experience, redirecting to unauthorized');
-			// No access - redirect to unauthorized
+			// No access or invalid access level - redirect to unauthorized
 			redirect('/unauthorized');
 		}
 	} catch (error) {

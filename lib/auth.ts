@@ -98,16 +98,19 @@ export async function checkAdminAccess(userId: string, companyId: string): Promi
 /**
  * Check if user has access to a specific experience
  * Based on Whop SDK checkIfUserHasAccessToExperience method
+ * Returns: { hasAccess: boolean, accessLevel: "admin" | "customer" | "no_access" }
  */
 export async function checkUserAccessToExperience(userId: string, experienceId: string): Promise<{
   hasAccess: boolean;
-  accessLevel: string;
+  accessLevel: "admin" | "customer" | "no_access";
 }> {
   try {
     const access = await whopSdk.access.checkIfUserHasAccessToExperience({
       userId,
       experienceId,
     });
+    
+    console.log('Whop SDK access result:', access);
     
     return {
       hasAccess: access.hasAccess,

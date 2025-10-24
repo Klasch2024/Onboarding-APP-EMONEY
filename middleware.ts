@@ -77,7 +77,10 @@ export async function middleware(request: NextRequest) {
           if (access.accessLevel === "admin") {
             console.log('Middleware: Admin user accessing experience, redirecting to dashboard');
             return NextResponse.redirect(new URL('/dashboard/default', request.url));
-          } else if (!access.hasAccess) {
+          } else if (access.accessLevel === "customer" && access.hasAccess === true) {
+            console.log('Middleware: Customer user with access, allowing experience access');
+            // Customer users with access can proceed to experience page
+          } else {
             console.log('Middleware: User does not have access to experience');
             return NextResponse.redirect(new URL('/unauthorized', request.url));
           }
