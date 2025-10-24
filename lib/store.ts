@@ -32,21 +32,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
       screens: [
         {
           id: 'screen-1',
-          name: 'Welcome',
-          components: [
-            {
-              id: 'welcome-heading',
-              type: 'heading',
-              content: { text: 'Welcome to Your Onboarding Experience' },
-              settings: { fontSize: 60, textAlign: 'center' }
-            },
-            {
-              id: 'welcome-paragraph',
-              type: 'paragraph',
-              content: { text: 'Get started with your journey. This is your personalized onboarding experience designed just for you.' },
-              settings: { fontSize: 18, textAlign: 'center' }
-            }
-          ]
+          name: 'Screen 1',
+          components: []
         }
       ],
       currentScreenId: 'screen-1',
