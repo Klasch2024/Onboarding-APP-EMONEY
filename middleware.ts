@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkUserPermissions, checkAdminAccess, checkUserAccess } from './lib/auth';
+import { checkUserPermissions, checkAdminAccess, checkUserAccessToExperience } from './lib/auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -67,10 +67,20 @@ export async function middleware(request: NextRequest) {
       
       // Use specific user access check for experience routes
       if (pathname.startsWith('/experiences/')) {
-        const hasUserAccess = await checkUserAccess(userId, companyId);
-        if (!hasUserAccess) {
-          console.log('Middleware: User does not have access to company');
-          return NextResponse.redirect(new URL('/unauthorized', request.url));
+        // Extract experienceId from pathname
+        const pathParts = pathname.split('/');
+        const experienceId = pathParts[2]; // /experiences/[experienceId]
+        
+        if (experienceId) {
+          const access = await checkUserAccessToExperience(userId, experienceId);
+          
+          if (access.accessLevel === "admin") {
+            console.log('Middleware: Admin user accessing experience, redirecting to dashboard');
+            return NextResponse.redirect(new URL('/dashboard/default', request.url));
+          } else if (!access.hasAccess) {
+            console.log('Middleware: User does not have access to experience');
+            return NextResponse.redirect(new URL('/unauthorized', request.url));
+          }
         }
       } else if (!permissions.isMember) {
         console.log('Middleware: User does not have member access');

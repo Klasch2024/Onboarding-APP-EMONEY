@@ -96,21 +96,29 @@ export async function checkAdminAccess(userId: string, companyId: string): Promi
 }
 
 /**
- * Check if user has any access to the company (for onboarding pages)
- * Based on Whop documentation pattern
+ * Check if user has access to a specific experience
+ * Based on Whop SDK checkIfUserHasAccessToExperience method
  */
-export async function checkUserAccess(userId: string, companyId: string): Promise<boolean> {
+export async function checkUserAccessToExperience(userId: string, experienceId: string): Promise<{
+  hasAccess: boolean;
+  accessLevel: string;
+}> {
   try {
-    const access = await whopSdk.access.checkIfUserHasAccessToCompany({
-      companyId: companyId,
-      userId: userId,
+    const access = await whopSdk.access.checkIfUserHasAccessToExperience({
+      userId,
+      experienceId,
     });
     
-    // Any user with access can view onboarding
-    return access.hasAccess;
+    return {
+      hasAccess: access.hasAccess,
+      accessLevel: access.accessLevel
+    };
   } catch (error) {
-    console.error('User access check failed:', error);
-    return false;
+    console.error('User access to experience check failed:', error);
+    return {
+      hasAccess: false,
+      accessLevel: 'no_access'
+    };
   }
 }
 

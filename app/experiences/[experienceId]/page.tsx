@@ -1,16 +1,18 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { checkUserAccess } from '@/lib/auth';
+import { checkUserAccessToExperience } from '@/lib/auth';
 import PreviewScreen from '@/components/PreviewScreen';
 
 /**
  * Experience Page Component
  * 
  * This page implements user access control using Whop SDK.
- * Any user with hasAccess: true can view the onboarding experience.
- * Users without access are redirected to unauthorized page.
+ * Uses checkIfUserHasAccessToExperience to determine access level.
  * 
- * Based on Whop documentation pattern for access control.
+ * Access levels:
+ * - "admin": Company admins (should see admin dashboard)
+ * - "customer": Regular members (should see onboarding page)
+ * - "no_access": No access (redirect to unauthorized)
  */
 export default async function ExperiencePage({
 	params,
@@ -22,25 +24,32 @@ export default async function ExperiencePage({
 	// Get user info from headers
 	const headersList = await headers();
 	const userId = headersList.get('x-whop-user-id') || headersList.get('x-user-id');
-	const companyId = headersList.get('x-whop-company-id') || headersList.get('x-company-id');
 	
 	// If no user info, redirect to unauthorized
-	if (!userId || !companyId) {
+	if (!userId) {
 		redirect('/unauthorized');
 	}
 	
 	try {
-		// Check if user has any access to the company using Whop SDK
-		const hasUserAccess = await checkUserAccess(userId, companyId);
+		// Check user access to the specific experience using Whop SDK
+		const access = await checkUserAccessToExperience(userId, experienceId);
 		
-		if (!hasUserAccess) {
-			console.log('User does not have access to company, redirecting to unauthorized');
+		console.log('User access to experience:', access);
+		
+		// Handle different access levels
+		if (access.accessLevel === "admin") {
+			console.log('Admin user accessing experience, redirecting to admin dashboard');
+			// Admin users should be redirected to admin dashboard
+			redirect('/dashboard/default');
+		} else if (access.hasAccess) {
+			console.log('User has access to experience, showing onboarding');
+			// Regular users with access can view the onboarding experience
+			return <PreviewScreen />;
+		} else {
+			console.log('User does not have access to experience, redirecting to unauthorized');
+			// No access - redirect to unauthorized
 			redirect('/unauthorized');
 		}
-		
-		console.log('User access confirmed, showing onboarding experience');
-		// User has access, show the onboarding experience
-		return <PreviewScreen />;
 	} catch (error) {
 		console.error('User access check failed:', error);
 		// On error, redirect to unauthorized page
