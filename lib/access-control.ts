@@ -1,0 +1,72 @@
+import { headers } from 'next/headers';
+import { whopSdk } from './whop-sdk';
+
+export interface AccessResult {
+  hasAccess: boolean;
+  accessLevel: 'admin' | 'no_access';
+  userId?: string;
+  error?: string;
+}
+
+/**
+ * Check if user has admin access to a company
+ * This function performs server-side access control using the Whop SDK
+ */
+export async function checkUserAccess(companyId: string): Promise<AccessResult> {
+  try {
+    // Get user token from headers
+    const headersList = await headers();
+    const userToken = headersList.get('authorization')?.replace('Bearer ', '');
+    
+    if (!userToken) {
+      return {
+        hasAccess: false,
+        accessLevel: 'no_access',
+        error: 'No user token provided'
+      };
+    }
+
+    // Verify user token and get user ID
+    const { userId } = await whopSdk.verifyUserToken(userToken);
+    
+    if (!userId) {
+      return {
+        hasAccess: false,
+        accessLevel: 'no_access',
+        error: 'Invalid user token'
+      };
+    }
+
+    // Check if user has access to the company
+    const access = await whopSdk.access.checkIfUserHasAccessToCompany({
+      companyId,
+      userId,
+    });
+
+    return {
+      hasAccess: access.hasAccess,
+      accessLevel: access.accessLevel as 'admin' | 'no_access',
+      userId
+    };
+  } catch (error) {
+    console.error('Access check failed:', error);
+    return {
+      hasAccess: false,
+      accessLevel: 'no_access',
+      error: 'Access check failed'
+    };
+  }
+}
+
+/**
+ * Client-side access check hook
+ * This should be used in client components to check access level
+ */
+export function useAccessLevel() {
+  // This would typically come from a context or store
+  // For now, we'll implement this in the components that need it
+  return {
+    isAdmin: false, // This will be set by the server-side check
+    hasAccess: false
+  };
+}
