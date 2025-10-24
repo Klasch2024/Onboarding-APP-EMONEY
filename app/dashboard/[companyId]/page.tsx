@@ -1,15 +1,13 @@
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
-import { checkAdminAccess } from '@/lib/auth';
 
 /**
  * Dashboard Page Component
  * 
- * This page implements admin access control using Whop SDK.
- * Only users with accessLevel === "admin" can access this dashboard.
- * Non-admin users are redirected to the onboarding page.
+ * This page redirects admin users to the onboarding builder.
+ * The onboarding builder is the main interface for creating
+ * and customizing onboarding flows.
  * 
- * Based on Whop documentation pattern for access control.
+ * Access is controlled by middleware - only admins can reach this page.
  */
 export default async function DashboardPage({
 	params,
@@ -18,31 +16,6 @@ export default async function DashboardPage({
 }) {
 	const { companyId } = await params;
 	
-	// Get user info from headers
-	const headersList = await headers();
-	const userId = headersList.get('x-whop-user-id') || headersList.get('x-user-id');
-	
-	// If no user info, redirect to onboarding
-	if (!userId) {
-		redirect('/experiences/default');
-	}
-	
-	try {
-		// Check if user has admin access using Whop SDK
-		const hasAdminAccess = await checkAdminAccess(userId, companyId);
-		
-		if (!hasAdminAccess) {
-			console.log('User does not have admin access, redirecting to onboarding');
-			// Redirect non-admin users to onboarding page
-			redirect('/experiences/default');
-		}
-		
-		console.log('Admin access confirmed, redirecting to builder');
-		// Admin users get redirected to the builder
-		redirect('/builder');
-	} catch (error) {
-		console.error('Admin access check failed:', error);
-		// On error, redirect to onboarding page
-		redirect('/experiences/default');
-	}
+	// Redirect to the builder page (middleware ensures only admins can access)
+	redirect('/builder');
 }

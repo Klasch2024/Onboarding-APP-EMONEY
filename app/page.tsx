@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
-export default async function Page() {
-	// Redirect to debug page to check access levels
-	redirect('/debug');
+export default function Page() {
+	// Redirect to the onboarding experience for normal users
+	// Admins can access /admin to get redirected to builder
+	redirect('/experiences/default');
 }
