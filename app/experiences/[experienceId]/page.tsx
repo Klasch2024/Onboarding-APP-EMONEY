@@ -38,27 +38,43 @@ export default async function ExperiencePage({
 	}
 	
 	try {
+		console.log('=== EXPERIENCE PAGE ACCESS CHECK ===');
+		console.log('User ID from headers:', userId);
+		console.log('Experience ID from params:', experienceId);
+		
 		// Check user access to the specific experience using Whop SDK
 		const access = await checkUserAccessToExperience(userId, experienceId);
 		
-		console.log('User access to experience:', access);
+		console.log('=== ACCESS DECISION LOGIC ===');
+		console.log('Access result:', access);
+		console.log('accessLevel:', access.accessLevel);
+		console.log('hasAccess:', access.hasAccess);
+		console.log('accessLevel === "admin":', access.accessLevel === "admin");
+		console.log('accessLevel === "customer" && hasAccess === true:', access.accessLevel === "customer" && access.hasAccess === true);
 		
 		// Implement exact Whop access control logic
 		if (access.accessLevel === "admin") {
-			console.log('Admin user detected, redirecting to dashboard for building experiences');
+			console.log('✅ ADMIN DETECTED: Redirecting to dashboard for building experiences');
 			// Admin users should be redirected to dashboard to build onboarding experiences
 			redirect('/dashboard/default');
 		} else if (access.accessLevel === "customer" && access.hasAccess === true) {
-			console.log('Customer user with valid access, showing onboarding experience');
+			console.log('✅ CUSTOMER WITH ACCESS: Showing onboarding experience');
 			// Customer users with valid access can view the onboarding experience
 			return <PreviewScreen />;
 		} else {
-			console.log('User has no access or invalid access level, redirecting to unauthorized');
+			console.log('❌ NO ACCESS: User has no access or invalid access level');
+			console.log('Access level was:', access.accessLevel);
+			console.log('Has access was:', access.hasAccess);
+			console.log('Redirecting to unauthorized...');
 			// All other users (no_access, customer without access, etc.) should be redirected to unauthorized
 			redirect('/unauthorized');
 		}
 	} catch (error) {
+		console.error('=== EXPERIENCE PAGE ERROR ===');
 		console.error('User access check failed:', error);
+		console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
+		console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+		console.error('=== END EXPERIENCE PAGE ERROR ===');
 		// On error, redirect to unauthorized page
 		redirect('/unauthorized');
 	}

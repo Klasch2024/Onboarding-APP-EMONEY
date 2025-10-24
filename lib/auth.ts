@@ -105,19 +105,55 @@ export async function checkUserAccessToExperience(userId: string, experienceId: 
   accessLevel: "admin" | "customer" | "no_access";
 }> {
   try {
+    console.log('=== WHOP SDK ACCESS CHECK ===');
+    console.log('User ID:', userId);
+    console.log('Experience ID:', experienceId);
+    console.log('BYPASS_AUTH env var:', process.env.BYPASS_AUTH);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    
+    // Temporary bypass for debugging
+    if (process.env.BYPASS_AUTH === 'true' || process.env.NODE_ENV === 'development') {
+      console.log('🚨 BYPASSING AUTH - GRANTING ADMIN ACCESS FOR DEBUGGING');
+      return {
+        hasAccess: true,
+        accessLevel: 'admin'
+      };
+    }
+    
+    console.log('Calling whopSdk.access.checkIfUserHasAccessToExperience...');
+    
     const access = await whopSdk.access.checkIfUserHasAccessToExperience({
       userId,
       experienceId,
     });
     
-    console.log('Whop SDK access result:', access);
+    console.log('=== WHOP SDK RESPONSE ===');
+    console.log('Full access object:', JSON.stringify(access, null, 2));
+    console.log('hasAccess:', access.hasAccess);
+    console.log('accessLevel:', access.accessLevel);
+    console.log('accessLevel type:', typeof access.accessLevel);
+    console.log('=== END WHOP SDK RESPONSE ===');
     
     return {
       hasAccess: access.hasAccess,
       accessLevel: access.accessLevel
     };
   } catch (error) {
-    console.error('User access to experience check failed:', error);
+    console.error('=== WHOP SDK ERROR ===');
+    console.error('Error calling checkIfUserHasAccessToExperience:', error);
+    console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('=== END WHOP SDK ERROR ===');
+    
+    // If SDK fails, try bypass for debugging
+    if (process.env.BYPASS_AUTH === 'true') {
+      console.log('🚨 SDK FAILED BUT BYPASS ENABLED - GRANTING ADMIN ACCESS');
+      return {
+        hasAccess: true,
+        accessLevel: 'admin'
+      };
+    }
+    
     return {
       hasAccess: false,
       accessLevel: 'no_access'
