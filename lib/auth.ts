@@ -47,8 +47,9 @@ export async function checkUserPermissions(userId: string, companyId: string): P
       };
     }
     
+    // Check if user is admin based on access level
     const isAdmin = access.accessLevel === 'admin';
-    const isMember = access.hasAccess; // If user has access, they are a member
+    const isMember = access.hasAccess; // Any user with access is a member
     
     console.log('User permissions:', { isAdmin, isMember, accessLevel: access.accessLevel });
     
@@ -72,6 +73,44 @@ export async function checkUserPermissions(userId: string, companyId: string): P
       company: { id: companyId },
       accessLevel: 'admin'
     };
+  }
+}
+
+/**
+ * Check if user has admin access specifically for dashboard routes
+ * Based on Whop documentation pattern
+ */
+export async function checkAdminAccess(userId: string, companyId: string): Promise<boolean> {
+  try {
+    const access = await whopSdk.access.checkIfUserHasAccessToCompany({
+      companyId: companyId,
+      userId: userId,
+    });
+    
+    // Only admin users can access dashboard
+    return access.hasAccess && access.accessLevel === 'admin';
+  } catch (error) {
+    console.error('Admin access check failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if user has any access to the company (for onboarding pages)
+ * Based on Whop documentation pattern
+ */
+export async function checkUserAccess(userId: string, companyId: string): Promise<boolean> {
+  try {
+    const access = await whopSdk.access.checkIfUserHasAccessToCompany({
+      companyId: companyId,
+      userId: userId,
+    });
+    
+    // Any user with access can view onboarding
+    return access.hasAccess;
+  } catch (error) {
+    console.error('User access check failed:', error);
+    return false;
   }
 }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkUserPermissions } from './lib/auth';
+import { checkUserPermissions, checkAdminAccess, checkUserAccess } from './lib/auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -34,11 +34,18 @@ export async function middleware(request: NextRequest) {
       accessLevel: permissions.accessLevel
     });
     
-    // Check if accessing admin routes
+    // Check if accessing admin routes (dashboard, builder, admin)
     if (adminRoutes.some(route => pathname.startsWith(route))) {
       console.log('Middleware: Accessing admin route:', pathname);
       
-      if (!permissions.isAdmin) {
+      // Use specific admin access check for dashboard routes
+      if (pathname.startsWith('/dashboard/')) {
+        const hasAdminAccess = await checkAdminAccess(userId, companyId);
+        if (!hasAdminAccess) {
+          console.log('Middleware: User does not have admin access for dashboard, redirecting to onboarding');
+          return NextResponse.redirect(new URL('/experiences/default', request.url));
+        }
+      } else if (!permissions.isAdmin) {
         console.log('Middleware: User does not have admin permissions, redirecting to user dashboard');
         return NextResponse.redirect(new URL('/experiences/default', request.url));
       }
@@ -54,11 +61,18 @@ export async function middleware(request: NextRequest) {
       return response;
     }
     
-    // Check if accessing user routes
+    // Check if accessing user routes (experiences)
     if (userRoutes.some(route => pathname.startsWith(route))) {
       console.log('Middleware: Accessing user route:', pathname);
       
-      if (!permissions.isMember) {
+      // Use specific user access check for experience routes
+      if (pathname.startsWith('/experiences/')) {
+        const hasUserAccess = await checkUserAccess(userId, companyId);
+        if (!hasUserAccess) {
+          console.log('Middleware: User does not have access to company');
+          return NextResponse.redirect(new URL('/unauthorized', request.url));
+        }
+      } else if (!permissions.isMember) {
         console.log('Middleware: User does not have member access');
         return NextResponse.redirect(new URL('/unauthorized', request.url));
       }
