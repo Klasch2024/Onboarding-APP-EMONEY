@@ -48,9 +48,17 @@ function DraggableScreenItem({ screen, index }: { screen: any; index: number }) 
 
   const handleDeleteScreen = () => {
     const { deleteScreen, screens } = useOnboardingStore.getState();
-    if (screens.length <= 1) return;
+    console.log('Attempting to delete screen:', screen.id);
+    console.log('Current screens count:', screens.length);
+    
+    if (screens.length <= 1) {
+      console.log('Cannot delete - only one screen left');
+      return;
+    }
+    
     deleteScreen(screen.id);
     setShowDeleteConfirm(false);
+    console.log('Screen deleted successfully');
   };
 
   const handleRename = () => {
