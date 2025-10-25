@@ -52,13 +52,13 @@ function DraggableScreenItem({ screen, index }: { screen: any; index: number }) 
     console.log('Current screens count:', screens.length);
     
     if (screens.length <= 1) {
-      console.log('Cannot delete - only one screen left');
+      console.log('Cannot delete last screen');
       return;
     }
     
     deleteScreen(screen.id);
-    setShowDeleteConfirm(false);
     console.log('Screen deleted successfully');
+    setShowDeleteConfirm(false);
   };
 
   const handleRename = () => {

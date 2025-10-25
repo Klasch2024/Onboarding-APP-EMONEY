@@ -71,7 +71,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
         console.log('Current screens:', state.screens.map(s => s.id));
         
         if (state.screens.length <= 1) {
-          console.log('Cannot delete - only one screen left');
+          console.log('Cannot delete last screen');
           return; // Don't delete the last screen
         }
         
