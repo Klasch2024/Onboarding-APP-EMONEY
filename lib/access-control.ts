@@ -18,13 +18,14 @@ export async function checkUserAccess(companyId: string): Promise<AccessResult> 
     const headersList = await headers();
     
     // Try different header formats that Whop might use
-    let userToken = headersList.get('authorization')?.replace('Bearer ', '');
+    let userToken: string | null = headersList.get('authorization')?.replace('Bearer ', '') || null;
     
     // Fallback: try other common header names
     if (!userToken) {
       userToken = headersList.get('x-user-token') || 
                   headersList.get('x-whop-token') ||
-                  headersList.get('user-token');
+                  headersList.get('user-token') ||
+                  null;
     }
     
     // Debug logging
