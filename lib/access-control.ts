@@ -14,15 +14,38 @@ export interface AccessResult {
  */
 export async function checkUserAccess(companyId: string): Promise<AccessResult> {
   try {
-    // Get user token from headers
+    // Get user token from headers - try multiple sources
     const headersList = await headers();
-    const userToken = headersList.get('authorization')?.replace('Bearer ', '');
+    
+    // Try different header formats that Whop might use
+    let userToken = headersList.get('authorization')?.replace('Bearer ', '');
+    
+    // Fallback: try other common header names
+    if (!userToken) {
+      userToken = headersList.get('x-user-token') || 
+                  headersList.get('x-whop-token') ||
+                  headersList.get('user-token');
+    }
+    
+    // Debug logging
+    console.log('Headers received:', Object.fromEntries(headersList.entries()));
+    console.log('Extracted token:', userToken ? 'Token found' : 'No token');
     
     if (!userToken) {
+      // For development/testing: allow bypass if no token is provided
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Development mode: Bypassing token check');
+        return {
+          hasAccess: true,
+          accessLevel: 'admin',
+          userId: 'dev-user'
+        };
+      }
+      
       return {
         hasAccess: false,
         accessLevel: 'no_access',
-        error: 'No user token provided'
+        error: 'No user token provided - check if app is properly integrated with Whop'
       };
     }
 
