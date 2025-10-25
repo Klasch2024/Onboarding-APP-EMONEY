@@ -67,29 +67,18 @@ export const useOnboardingStore = create<OnboardingStore>()(
 
       deleteScreen: (screenId: string) => {
         const state = get();
-        console.log('Store deleteScreen called with:', screenId);
-        console.log('Current screens:', state.screens.map(s => s.id));
-        
-        if (state.screens.length <= 1) {
-          console.log('Cannot delete last screen');
-          return; // Don't delete the last screen
-        }
+        if (state.screens.length <= 1) return; // Don't delete the last screen
         
         const newScreens = state.screens.filter(screen => screen.id !== screenId);
         const newCurrentScreenId = state.currentScreenId === screenId 
           ? newScreens[0]?.id || null 
           : state.currentScreenId;
         
-        console.log('New screens after deletion:', newScreens.map(s => s.id));
-        console.log('New current screen ID:', newCurrentScreenId);
-        
         set({
           screens: newScreens,
           currentScreenId: newCurrentScreenId,
           selectedComponentId: null
         });
-        
-        console.log('Store state updated successfully');
       },
 
       reorderScreens: (fromIndex: number, toIndex: number) => {
