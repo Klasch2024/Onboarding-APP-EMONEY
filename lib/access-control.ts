@@ -24,36 +24,41 @@ export async function checkUserAccess(companyId: string): Promise<AccessResult> 
       };
     }
 
-    // Get user token from multiple sources
-    const headersList = await headers();
-    const cookieStore = await cookies();
-    
-    // Try different token sources that Whop might use
+    // For production, try to get user token from multiple sources
     let userToken: string | null = null;
     
-    // 1. Try authorization header
-    userToken = headersList.get('authorization')?.replace('Bearer ', '') || null;
-    
-    // 2. Try other header formats
-    if (!userToken) {
-      userToken = headersList.get('x-user-token') || 
-                  headersList.get('x-whop-token') ||
-                  headersList.get('user-token') ||
-                  null;
+    try {
+      const headersList = await headers();
+      const cookieStore = await cookies();
+      
+      // 1. Try authorization header
+      userToken = headersList.get('authorization')?.replace('Bearer ', '') || null;
+      
+      // 2. Try other header formats
+      if (!userToken) {
+        userToken = headersList.get('x-user-token') || 
+                    headersList.get('x-whop-token') ||
+                    headersList.get('user-token') ||
+                    null;
+      }
+      
+      // 3. Try cookies (Whop often uses cookies)
+      if (!userToken) {
+        userToken = cookieStore.get('whop-token')?.value ||
+                    cookieStore.get('user-token')?.value ||
+                    cookieStore.get('access-token')?.value ||
+                    null;
+      }
+      
+      // Debug logging
+      console.log('Headers received:', Object.fromEntries(headersList.entries()));
+      console.log('Cookies received:', Object.fromEntries(cookieStore.getAll().map(c => [c.name, c.value])));
+      console.log('Extracted token:', userToken ? 'Token found' : 'No token');
+      
+    } catch (headerError) {
+      console.error('Error accessing headers/cookies:', headerError);
+      // Continue without token
     }
-    
-    // 3. Try cookies (Whop often uses cookies)
-    if (!userToken) {
-      userToken = cookieStore.get('whop-token')?.value ||
-                  cookieStore.get('user-token')?.value ||
-                  cookieStore.get('access-token')?.value ||
-                  null;
-    }
-    
-    // Debug logging
-    console.log('Headers received:', Object.fromEntries(headersList.entries()));
-    console.log('Cookies received:', Object.fromEntries(cookieStore.getAll().map(c => [c.name, c.value])));
-    console.log('Extracted token:', userToken ? 'Token found' : 'No token');
     
     if (!userToken) {
       return {
