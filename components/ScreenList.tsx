@@ -239,6 +239,20 @@ export default function ScreenList() {
           <Plus className="w-4 h-4" />
           <span>Add Screen</span>
         </button>
+        
+        {/* Debug: Test Delete Function */}
+        {screens.length > 1 && (
+          <button
+            onClick={() => {
+              const { deleteScreen } = useOnboardingStore.getState();
+              console.log('Testing direct delete call');
+              deleteScreen(screens[1].id);
+            }}
+            className="w-full mt-2 flex items-center justify-center space-x-2 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
+          >
+            🧪 Test Delete Screen 2
+          </button>
+        )}
       </div>
     </div>
   );
