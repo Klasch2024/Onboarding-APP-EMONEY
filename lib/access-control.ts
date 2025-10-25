@@ -1,4 +1,4 @@
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 import { whopSdk } from './whop-sdk';
 
 export interface AccessResult {
@@ -14,13 +14,27 @@ export interface AccessResult {
  */
 export async function checkUserAccess(companyId: string): Promise<AccessResult> {
   try {
-    // Get user token from headers - try multiple sources
+    // For development/testing: allow bypass if no token is provided
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: Bypassing token check');
+      return {
+        hasAccess: true,
+        accessLevel: 'admin',
+        userId: 'dev-user'
+      };
+    }
+
+    // Get user token from multiple sources
     const headersList = await headers();
+    const cookieStore = await cookies();
     
-    // Try different header formats that Whop might use
-    let userToken: string | null = headersList.get('authorization')?.replace('Bearer ', '') || null;
+    // Try different token sources that Whop might use
+    let userToken: string | null = null;
     
-    // Fallback: try other common header names
+    // 1. Try authorization header
+    userToken = headersList.get('authorization')?.replace('Bearer ', '') || null;
+    
+    // 2. Try other header formats
     if (!userToken) {
       userToken = headersList.get('x-user-token') || 
                   headersList.get('x-whop-token') ||
@@ -28,21 +42,20 @@ export async function checkUserAccess(companyId: string): Promise<AccessResult> 
                   null;
     }
     
+    // 3. Try cookies (Whop often uses cookies)
+    if (!userToken) {
+      userToken = cookieStore.get('whop-token')?.value ||
+                  cookieStore.get('user-token')?.value ||
+                  cookieStore.get('access-token')?.value ||
+                  null;
+    }
+    
     // Debug logging
     console.log('Headers received:', Object.fromEntries(headersList.entries()));
+    console.log('Cookies received:', Object.fromEntries(cookieStore.getAll().map(c => [c.name, c.value])));
     console.log('Extracted token:', userToken ? 'Token found' : 'No token');
     
     if (!userToken) {
-      // For development/testing: allow bypass if no token is provided
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Development mode: Bypassing token check');
-        return {
-          hasAccess: true,
-          accessLevel: 'admin',
-          userId: 'dev-user'
-        };
-      }
-      
       return {
         hasAccess: false,
         accessLevel: 'no_access',
