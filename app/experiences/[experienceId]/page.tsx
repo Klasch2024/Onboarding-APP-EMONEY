@@ -32,6 +32,9 @@ export default async function ExperiencePage({
 		// Fetch user and experience data using Whop SDK
 		try {
 			console.log('🔍 DEBUG: Fetching user and experience data...');
+			console.log('🔍 DEBUG: SDK instance:', !!whopSdk);
+			console.log('🔍 DEBUG: SDK users:', !!whopSdk.users);
+			console.log('🔍 DEBUG: SDK experiences:', !!whopSdk.experiences);
 			
 			// Get current user
 			const currentUser = await whopSdk.users.getCurrentUser();
@@ -46,8 +49,13 @@ export default async function ExperiencePage({
 			}
 
 			// Get experience data
-			const experience = await whopSdk.experiences.getExperience({ experienceId });
-			console.log('✅ DEBUG: Experience data:', experience);
+			try {
+				const experience = await whopSdk.experiences.getExperience({ experienceId });
+				console.log('✅ DEBUG: Experience data:', experience);
+			} catch (expError) {
+				console.error('❌ Error fetching experience:', expError);
+				// Continue anyway - experience fetch failure shouldn't block user
+			}
 			
 			// For now, assume user has access if they can get user info
 			// In production, you'd implement proper access checking
@@ -66,6 +74,7 @@ export default async function ExperiencePage({
 			
 			// Redirect to onboarding with user context
 			// The onboarding page will handle showing admin controls if needed
+			console.log('✅ DEBUG: Redirecting to onboarding with user context');
 			redirect('/onboarding');
 			
 		} catch (sdkError) {

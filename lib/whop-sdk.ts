@@ -11,6 +11,14 @@ import { WhopServerSdk } from "@whop/api";
  * 
  * All environment variables are loaded from your .env.local file
  */
+
+// Debug environment variables
+console.log('🔍 DEBUG: Environment variables:');
+console.log('  - NEXT_PUBLIC_WHOP_APP_ID:', process.env.NEXT_PUBLIC_WHOP_APP_ID ? 'Set' : 'Missing');
+console.log('  - WHOP_API_KEY:', process.env.WHOP_API_KEY ? 'Set' : 'Missing');
+console.log('  - NEXT_PUBLIC_WHOP_AGENT_USER_ID:', process.env.NEXT_PUBLIC_WHOP_AGENT_USER_ID ? 'Set' : 'Missing');
+console.log('  - NEXT_PUBLIC_WHOP_COMPANY_ID:', process.env.NEXT_PUBLIC_WHOP_COMPANY_ID ? 'Set' : 'Missing');
+
 export const whopSdk = WhopServerSdk({
 	// Your Whop App ID - REQUIRED
 	// Get this from your Whop dashboard after creating an app
@@ -35,3 +43,5 @@ export const whopSdk = WhopServerSdk({
 	// You can also change this later with the `withCompany()` function
 	companyId: process.env.NEXT_PUBLIC_WHOP_COMPANY_ID,
 });
+
+console.log('✅ DEBUG: Whop SDK initialized:', !!whopSdk);
