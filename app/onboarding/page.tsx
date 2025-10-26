@@ -7,6 +7,7 @@ import PreviewImageComponent from '@/components/PreviewImageComponent';
 import PreviewVideoComponent from '@/components/PreviewVideoComponent';
 import PreviewGifComponent from '@/components/PreviewGifComponent';
 import PreviewLinkComponent from '@/components/PreviewLinkComponent';
+import UserDebugPanel from '@/components/UserDebugPanel';
 
 export default function OnboardingPage() {
   // Get screens, currentScreenId, and selectScreen from store
@@ -56,6 +57,9 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-[#111111] flex flex-col">
+      {/* Debug Panel */}
+      <UserDebugPanel />
+      
       {/* Onboarding Content */}
       <div className="flex-1 p-8 overflow-y-auto">
         {components.length === 0 ? (
