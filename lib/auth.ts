@@ -2,10 +2,10 @@ import { whopSdk } from './whop-sdk';
 import { headers } from 'next/headers';
 
 /**
- * Check if the current user is an admin of the company
- * @returns Promise<boolean> - true if user is admin, false otherwise
+ * Get the user ID from Whop context
+ * @returns Promise<string | null>
  */
-export async function isUserAdmin(): Promise<boolean> {
+async function getWhopUserId(): Promise<string | null> {
 	try {
 		// Get the authorization header from Next.js headers
 		const headersList = await headers();
@@ -14,49 +14,49 @@ export async function isUserAdmin(): Promise<boolean> {
 		console.log('🔍 DEBUG: Authorization header:', authorization ? 'Present' : 'Missing');
 		console.log('🔍 DEBUG: Full headers:', Object.fromEntries(headersList.entries()));
 
-		// Return false if no authorization header
 		if (!authorization) {
 			console.log('❌ No authorization header found');
+			return null;
+		}
+
+		// Try to get current user info from Whop SDK
+		try {
+			const currentUser = await whopSdk.users.getCurrentUser();
+			console.log('✅ DEBUG: Current user from SDK:', currentUser);
+			
+			const userId = currentUser?.user?.id;
+			console.log('🔍 DEBUG: Extracted user ID:', userId);
+			
+			return userId || null;
+		} catch (sdkError) {
+			console.error('❌ SDK Error getting current user:', sdkError);
+			return null;
+		}
+	} catch (error) {
+		console.error('❌ Error getting Whop user ID:', error);
+		return null;
+	}
+}
+
+/**
+ * Check if the current user is an admin of the company
+ * @returns Promise<boolean> - true if user is admin, false otherwise
+ */
+export async function isUserAdmin(): Promise<boolean> {
+	try {
+		const userId = await getWhopUserId();
+		
+		if (!userId) {
+			console.log('❌ No user ID found, not admin');
 			return false;
 		}
 
-		// Try to validate with Whop SDK
-		try {
-			// Check if we can get user info from the SDK
-			const userInfo = await whopSdk.users.getCurrentUser();
-			console.log('✅ DEBUG: User info from SDK:', userInfo);
-			
-			// The SDK returns a structure with user property
-			const user = userInfo?.user;
-			console.log('🔍 DEBUG: User object:', user);
-			
-			// For now, let's assume all authenticated users are admins
-			// In production, you'd check company memberships or other admin indicators
-			const isAdmin = !!user; // If we can get user info, assume admin for now
-			
-			console.log('🔍 DEBUG: User ID:', user?.id);
-			console.log('🔍 DEBUG: Is admin:', isAdmin);
-			
-			return isAdmin;
-		} catch (sdkError) {
-			console.error('❌ SDK Error:', sdkError);
-			
-			// Fallback: Check if we have company ID and user seems to be admin
-			const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
-			console.log('🔍 DEBUG: Company ID:', companyId);
-			
-			// For development, let's be more permissive
-			// In production, this should be more strict
-			console.log('🔍 DEBUG: Development mode - checking authorization header format');
-			
-			// If we have a valid-looking authorization header, assume admin for now
-			if (authorization.startsWith('Bearer ') || authorization.includes('whop')) {
-				console.log('✅ DEBUG: Valid-looking auth header, assuming admin');
-				return true;
-			}
-			
-			return false;
-		}
+		console.log('🔍 DEBUG: Checking admin status for user:', userId);
+
+		// For now, let's assume all authenticated users are admins
+		// This is a temporary solution until we can properly check company memberships
+		console.log('🔍 DEBUG: Assuming admin for authenticated user');
+		return true;
 	} catch (error) {
 		console.error('❌ Error checking user admin status:', error);
 		return false;
@@ -73,39 +73,36 @@ export async function getCurrentUser(): Promise<{
 	userInfo?: any;
 } | null> {
 	try {
-		// Get the authorization header from Next.js headers
-		const headersList = await headers();
-		const authorization = headersList.get('authorization');
-
+		const userId = await getWhopUserId();
+		
 		console.log('🔍 DEBUG: Getting current user...');
-		console.log('🔍 DEBUG: Authorization header present:', !!authorization);
+		console.log('🔍 DEBUG: User ID found:', userId);
 
-		if (!authorization) {
-			console.log('❌ No authorization header for getCurrentUser');
+		if (!userId) {
+			console.log('❌ No user ID found for getCurrentUser');
 			return null;
 		}
 
-		// Try to get user info from Whop SDK
+		// Get basic user info from getCurrentUser
 		try {
-			const userInfo = await whopSdk.users.getCurrentUser();
-			console.log('✅ DEBUG: User info retrieved:', userInfo);
+			const currentUserInfo = await whopSdk.users.getCurrentUser();
+			console.log('✅ DEBUG: Current user info retrieved:', currentUserInfo);
 			
-			const user = userInfo?.user;
 			const isAdmin = await isUserAdmin();
 			
 			return {
-				userId: user?.id || 'unknown',
+				userId: userId,
 				isAdmin,
-				userInfo,
+				userInfo: currentUserInfo,
 			};
 		} catch (sdkError) {
 			console.error('❌ SDK Error in getCurrentUser:', sdkError);
 			
-			// Fallback with mock data for debugging
+			// Fallback with basic info
 			const isAdmin = await isUserAdmin();
 			
 			return {
-				userId: 'fallback-user',
+				userId: userId,
 				isAdmin,
 				userInfo: { error: 'SDK Error', details: sdkError },
 			};
