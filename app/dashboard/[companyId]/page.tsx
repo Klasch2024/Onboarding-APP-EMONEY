@@ -3,14 +3,15 @@ import { redirect } from 'next/navigation';
 /**
  * Dashboard Page Component
  * 
- * This page redirects users to the onboarding experience.
- * Admins will have additional access to the builder through the onboarding page.
+ * This page redirects users to the onboarding builder.
+ * The onboarding builder is the main interface for creating
+ * and customizing onboarding flows.
  */
 export default async function DashboardPage({
 	params,
 }: {
 	params: Promise<{ companyId: string }>;
 }) {
-	// All users go to onboarding - admins will see additional controls there
-	redirect('/onboarding');
+	// Redirect to the builder page
+	redirect('/builder');
 }
