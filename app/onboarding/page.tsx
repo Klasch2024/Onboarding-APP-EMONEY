@@ -8,6 +8,8 @@ import PreviewVideoComponent from '@/components/PreviewVideoComponent';
 import PreviewGifComponent from '@/components/PreviewGifComponent';
 import PreviewLinkComponent from '@/components/PreviewLinkComponent';
 import UserDebugPanel from '@/components/UserDebugPanel';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function OnboardingPage() {
   // Get screens, currentScreenId, and selectScreen from store
@@ -18,6 +20,28 @@ export default function OnboardingPage() {
   // Calculate current screen index and if it's the last screen
   const currentScreenIndex = screens.findIndex(screen => screen.id === currentScreenId);
   const isLastScreen = currentScreenIndex === screens.length - 1;
+
+  // Check if user is admin
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/debug/user');
+        if (response.ok) {
+          const userData = await response.json();
+          setIsAdmin(userData?.isAdmin || false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, []);
 
   // Implement handleContinue function
   const handleContinue = () => {
@@ -59,6 +83,30 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-[#111111] flex flex-col">
       {/* Debug Panel */}
       <UserDebugPanel />
+      
+      {/* Admin Controls - Only visible to admins */}
+      {!loading && isAdmin && (
+        <div className="bg-[#2a2a2a] border-b border-[#3a3a3a] p-4">
+          <div className="max-w-4xl mx-auto flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-white">Admin Mode</span>
+              </div>
+              <span className="text-xs text-[#888888]">You can edit this onboarding experience</span>
+            </div>
+            <Link
+              href="/admin"
+              className="bg-[#4a7fff] hover:bg-[#5a8fff] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span>Edit Onboarding</span>
+            </Link>
+          </div>
+        </div>
+      )}
       
       {/* Onboarding Content */}
       <div className="flex-1 p-8 overflow-y-auto">
