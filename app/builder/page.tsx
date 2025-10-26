@@ -1,30 +1,22 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { isUserAdmin } from '@/lib/auth';
+import BuilderClient from '@/components/BuilderClient';
 
-import Layout from '@/components/Layout';
-import ScreenList from '@/components/ScreenList';
-import Canvas from '@/components/Canvas';
-import ComponentEditor from '@/components/ComponentEditor';
-import PreviewScreen from '@/components/PreviewScreen';
-import { useOnboardingStore } from '@/lib/store';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+/**
+ * Builder Page - Admin Only
+ * 
+ * This page is only accessible to admins. Regular members
+ * will be redirected to the onboarding view.
+ */
+export default async function BuilderPage() {
+  // Check if user is admin
+  const isAdmin = await isUserAdmin();
 
-export default function BuilderPage() {
-  const { activeTab } = useOnboardingStore();
+  // If not admin, redirect to onboarding view
+  if (!isAdmin) {
+    redirect('/onboarding');
+  }
 
-  return (
-    <Layout>
-      {/* Main Content Area */}
-      {activeTab === 'builder' ? (
-        <DndProvider backend={HTML5Backend}>
-          {/* Left Sidebar - Screen Management */}
-          <ScreenList />
-          <Canvas />
-          <ComponentEditor />
-        </DndProvider>
-      ) : (
-        <PreviewScreen />
-      )}
-    </Layout>
-  );
+  // If admin, show the builder interface
+  return <BuilderClient />;
 }
