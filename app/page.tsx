@@ -6,10 +6,10 @@ export default async function Page() {
 	const user = await getCurrentUser();
 	
 	if (user && user.isAdmin) {
-		// Admin user - redirect to admin builder
+		// Admin user - redirect to admin builder (the actual onboarding app)
 		redirect('/admin/builder');
 	} else {
-		// Non-admin or unauthenticated user - redirect to onboarding discover
+		// Non-admin or unauthenticated user - redirect to discover page
 		redirect('/onboarding/discover');
 	}
 }

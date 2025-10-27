@@ -22,6 +22,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow root path to be handled by the page logic
+  if (pathname === '/') {
+    return NextResponse.next();
+  }
+
   try {
     // Verify user token and get user ID
     const userToken = request.headers.get('authorization')?.replace('Bearer ', '') ||
