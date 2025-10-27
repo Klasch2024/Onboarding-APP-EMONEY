@@ -13,16 +13,14 @@ import ClientPage from './ClientPage';
  */
 export default async function Page() {
   try {
-    // Fetch headers and verify user token
+    // Fetch headers and verify user token - using same pattern as example
     const headersList = await headers();
-    const verification = await whopSdk.verifyUserToken(headersList);
+    const { userId } = await whopSdk.verifyUserToken(headersList);
     
-    if (!verification || !verification.userId) {
+    if (!userId) {
       // No authenticated user - show onboarding page as default
       return <ClientPage />;
     }
-
-    const userId = verification.userId;
 
     // Check company access for admin role
     const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;

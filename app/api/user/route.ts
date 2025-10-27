@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Verify the user token
-    const verification = await whopSdk.verifyUserToken(request.headers);
+    // Verify the user token - using same pattern as example
+    const { userId } = await whopSdk.verifyUserToken(request.headers);
 
-    if (!verification || !verification.userId) {
+    if (!userId) {
       return NextResponse.json({
         token: 'Invalid',
         userId: null,
@@ -30,8 +30,6 @@ export async function GET(request: NextRequest) {
         error: 'Invalid token'
       });
     }
-
-    const userId = verification.userId;
 
     // Check admin access
     const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
