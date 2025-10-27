@@ -21,6 +21,12 @@ export interface AccessCheck {
   hasAccess: boolean;
 }
 
+export interface CurrentUser {
+  userId: string;
+  isAdmin: boolean;
+  accessLevel: 'admin' | 'customer' | 'no_access';
+}
+
 /**
  * Verify user token and get user ID
  */
@@ -105,15 +111,18 @@ export async function checkExperienceAccess(userId: string, experienceId: string
 /**
  * Get current user info (if authenticated)
  */
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<CurrentUser | null> {
   const verification = await verifyUserToken();
   
   if (!verification.success || !verification.userId) {
     return null;
   }
 
+  const adminAccess = await checkAdminAccess(verification.userId);
+
   return {
     userId: verification.userId,
-    isAdmin: (await checkAdminAccess(verification.userId)).hasAccess
+    isAdmin: adminAccess.hasAccess,
+    accessLevel: adminAccess.accessLevel
   };
 }

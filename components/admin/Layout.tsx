@@ -15,25 +15,24 @@ export default function Layout({ children }: LayoutProps) {
   const [showDebug, setShowDebug] = useState(true);
 
   useEffect(() => {
-    // Fetch debug info
+    // Fetch debug info from API
     const fetchDebugInfo = async () => {
       try {
-        // Get cookies
-        const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-          const [key, value] = cookie.trim().split('=');
-          acc[key] = value;
-          return acc;
-        }, {} as Record<string, string>);
-
+        const response = await fetch('/api/user');
+        const userData = await response.json();
+        
         setDebugInfo({
-          cookies: Object.keys(cookies).length > 0 ? 'Cookies found' : 'No cookies',
-          cookieKeys: Object.keys(cookies),
+          ...userData,
           timestamp: new Date().toISOString(),
           pathname: window.location.pathname,
-          hasWhopToken: !!cookies['whop-token'],
         });
       } catch (error) {
-        setDebugInfo({ error: String(error) });
+        setDebugInfo({ 
+          error: String(error),
+          token: 'API Error',
+          isAdmin: false,
+          accessLevel: 'no_access'
+        });
       }
     };
 
@@ -54,10 +53,16 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex items-center space-x-4">
               <span className="font-semibold text-yellow-300">🔍 DEBUG INFO:</span>
               <span className="text-yellow-200">
-                Token: {debugInfo.hasWhopToken ? '✅ Found' : '❌ Not Found'}
+                Token: {debugInfo.token === 'Found' ? '✅ Found' : '❌ Not Found'}
               </span>
               <span className="text-yellow-200">
-                Cookies: {debugInfo.cookies} ({debugInfo.cookieKeys.length})
+                User: {debugInfo.userId ? `✅ ${debugInfo.userId}` : '❌ No User'}
+              </span>
+              <span className="text-yellow-200">
+                Admin: {debugInfo.isAdmin ? '✅ Yes' : '❌ No'}
+              </span>
+              <span className="text-yellow-200">
+                Access: {debugInfo.accessLevel || 'unknown'}
               </span>
               <span className="text-yellow-200">Path: {debugInfo.pathname}</span>
               <span className="text-yellow-200">Time: {new Date(debugInfo.timestamp).toLocaleTimeString()}</span>
