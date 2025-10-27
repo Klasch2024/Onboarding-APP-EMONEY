@@ -1,30 +1,68 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { whopSdk } from '@/lib/shared/whop-sdk';
+import { headers } from 'next/headers';
+import ClientPage from './ClientPage';
 
-import Layout from '@/components/admin/Layout';
-import ScreenList from '@/components/admin/ScreenList';
-import Canvas from '@/components/admin/Canvas';
-import ComponentEditor from '@/components/admin/ComponentEditor';
-import PreviewScreen from '@/components/onboarding/PreviewScreen';
-import { useOnboardingStore } from '@/lib/admin/store';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+/**
+ * Root Page - Role-Based Access Control
+ * 
+ * Fetches user info using Whop SDK and routes based on access level:
+ * - admin: Full access to admin dashboard + onboarding page
+ * - customer: Only onboarding page
+ * - no_access: Access denied or redirect
+ */
+export default async function Page() {
+  try {
+    // Fetch headers and verify user token
+    const headersList = await headers();
+    const verification = await whopSdk.verifyUserToken(headersList);
+    
+    if (!verification || !verification.userId) {
+      // No authenticated user - show onboarding page as default
+      return <ClientPage />;
+    }
 
-export default function Page() {
-  const { activeTab } = useOnboardingStore();
+    const userId = verification.userId;
 
-  return (
-    <Layout>
-      {/* Main Content Area */}
-      {activeTab === 'builder' ? (
-        <DndProvider backend={HTML5Backend}>
-          {/* Left Sidebar - Screen Management */}
-          <ScreenList />
-          <Canvas />
-          <ComponentEditor />
-        </DndProvider>
-      ) : (
-        <PreviewScreen />
-      )}
-    </Layout>
-  );
+    // Check company access for admin role
+    const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
+    let accessLevel = 'customer'; // Default to customer
+    
+    if (companyId) {
+      try {
+        const accessCheck = await whopSdk.access.checkIfUserHasAccessToCompany({
+          userId,
+          companyId
+        });
+        accessLevel = accessCheck.accessLevel;
+      } catch (error) {
+        console.error('Error checking company access:', error);
+        // Default to customer on error
+        accessLevel = 'customer';
+      }
+    }
+
+    // Conditional rendering based on access level
+    if (accessLevel === 'admin') {
+      // Admin: Show full access (already handled by ClientPage)
+      return <ClientPage accessLevel={accessLevel} userId={userId} />;
+    } else if (accessLevel === 'customer') {
+      // Customer: Show onboarding page only
+      return <ClientPage accessLevel={accessLevel} userId={userId} />;
+    } else {
+      // No access: Show access denied
+      return (
+        <div className="min-h-screen bg-[#111111] text-white flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
+            <p className="text-gray-400">You don't have access to this application.</p>
+          </div>
+        </div>
+      );
+    }
+  } catch (error) {
+    console.error('Auth error:', error);
+    // On error, show onboarding page as default
+    return <ClientPage />;
+  }
 }

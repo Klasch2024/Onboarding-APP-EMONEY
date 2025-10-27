@@ -7,12 +7,15 @@ import { useState, useEffect } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
+  accessLevel?: 'admin' | 'customer' | 'no_access';
+  userId?: string;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, accessLevel = 'customer', userId }: LayoutProps) {
   const { activeTab, setActiveTab } = useOnboardingStore();
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [showDebug, setShowDebug] = useState(true);
+  const isAdmin = accessLevel === 'admin';
 
   useEffect(() => {
     // Fetch debug info from API
