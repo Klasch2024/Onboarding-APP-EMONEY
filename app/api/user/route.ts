@@ -7,28 +7,26 @@ export async function GET(request: NextRequest) {
     
     if (!user) {
       return NextResponse.json({
-        success: false,
-        message: 'No user found',
         token: 'Not Found',
+        userId: null,
         isAdmin: false,
-        accessLevel: 'no_access'
+        accessLevel: 'no_access',
+        error: 'No user found'
       });
     }
 
     return NextResponse.json({
-      success: true,
+      token: 'Found',
       userId: user.userId,
       isAdmin: user.isAdmin,
       accessLevel: user.accessLevel,
-      token: 'Found',
-      message: 'User authenticated'
+      error: null
     });
   } catch (error) {
-    console.error('User API error:', error);
+    console.error('API error:', error);
     return NextResponse.json({
-      success: false,
-      message: 'Authentication error',
       token: 'Error',
+      userId: null,
       isAdmin: false,
       accessLevel: 'no_access',
       error: String(error)
