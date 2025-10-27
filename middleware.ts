@@ -7,7 +7,7 @@ import { whopSdk } from './lib/shared/whop-sdk';
  * This middleware runs on every request and checks:
  * 1. User authentication via Whop SDK
  * 2. Access level for admin routes
- * 3. Redirects non-admin users to onboarding pages
+ * 3. Redirects non-admin users appropriately
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,14 +23,15 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Verify user token and get user ID
-    const userToken = request.headers.get('authorization')?.replace('Bearer ', '') ||
-                     request.cookies.get('whop-token')?.value;
+    // Get token from headers or cookies
+    const authHeader = request.headers.get('authorization');
+    const cookieToken = request.cookies.get('whop-token')?.value;
+    const token = authHeader?.replace('Bearer ', '') || cookieToken;
     
-    if (!userToken) {
-      // No token - redirect to onboarding page
+    if (!token) {
+      // No token - allow access to root but redirect admin routes
       if (pathname.startsWith('/admin')) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
       }
       return NextResponse.next();
     }
@@ -39,9 +40,9 @@ export async function middleware(request: NextRequest) {
     const verification = await whopSdk.verifyUserToken(request.headers);
 
     if (!verification || !verification.userId) {
-      // Invalid token - redirect to onboarding page
+      // Invalid token - redirect admin routes to root
       if (pathname.startsWith('/admin')) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
       }
       return NextResponse.next();
     }
@@ -55,7 +56,7 @@ export async function middleware(request: NextRequest) {
       
       if (!companyId) {
         console.error('WHOP_COMPANY_ID not configured');
-        return NextResponse.redirect(new URL('/onboarding', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
       }
 
       try {
@@ -66,11 +67,11 @@ export async function middleware(request: NextRequest) {
 
         // Only allow users with admin access
         if (accessCheck.accessLevel !== 'admin') {
-          return NextResponse.redirect(new URL('/onboarding', request.url));
+          return NextResponse.redirect(new URL('/', request.url));
         }
       } catch (error) {
         console.error('Error checking company access:', error);
-        return NextResponse.redirect(new URL('/onboarding', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
       }
     }
 
@@ -78,9 +79,9 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error('Middleware error:', error);
     
-    // On error, redirect admin users to onboarding page
+    // On error, redirect admin users to root
     if (pathname.startsWith('/admin')) {
-      return NextResponse.redirect(new URL('/onboarding', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
     
     return NextResponse.next();

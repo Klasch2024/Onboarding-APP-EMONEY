@@ -112,11 +112,8 @@ export async function getCurrentUser() {
     return null;
   }
 
-  const adminAccess = await checkAdminAccess(verification.userId);
-
   return {
     userId: verification.userId,
-    isAdmin: adminAccess.hasAccess,
-    accessLevel: adminAccess.accessLevel
+    isAdmin: (await checkAdminAccess(verification.userId)).hasAccess
   };
 }

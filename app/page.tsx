@@ -1,15 +1,30 @@
-import { redirect } from 'next/navigation';
-import { getCurrentUser } from '@/lib/shared/auth';
+'use client';
 
-export default async function Page() {
-  // Check if user is authenticated and has admin access
-  const user = await getCurrentUser();
-  
-  if (user && user.isAdmin) {
-    // Admin user - redirect to admin builder
-    redirect('/admin/builder');
-  } else {
-    // Non-admin or unauthenticated user - redirect to onboarding page
-    redirect('/onboarding');
-  }
+import Layout from '@/components/admin/Layout';
+import ScreenList from '@/components/admin/ScreenList';
+import Canvas from '@/components/admin/Canvas';
+import ComponentEditor from '@/components/admin/ComponentEditor';
+import PreviewScreen from '@/components/onboarding/PreviewScreen';
+import { useOnboardingStore } from '@/lib/admin/store';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
+export default function Page() {
+  const { activeTab } = useOnboardingStore();
+
+  return (
+    <Layout>
+      {/* Main Content Area */}
+      {activeTab === 'builder' ? (
+        <DndProvider backend={HTML5Backend}>
+          {/* Left Sidebar - Screen Management */}
+          <ScreenList />
+          <Canvas />
+          <ComponentEditor />
+        </DndProvider>
+      ) : (
+        <PreviewScreen />
+      )}
+    </Layout>
+  );
 }
