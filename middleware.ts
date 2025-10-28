@@ -36,18 +36,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Verify the user token
-    const verification = await whopSdk.verifyUserToken(request.headers);
+    // Verify the user token - using same pattern as example
+    const { userId } = await whopSdk.verifyUserToken(request.headers);
 
-    if (!verification || !verification.userId) {
+    if (!userId) {
       // Invalid token - redirect admin routes to root
       if (pathname.startsWith('/admin')) {
         return NextResponse.redirect(new URL('/', request.url));
       }
       return NextResponse.next();
     }
-
-    const userId = verification.userId;
 
     // Check if user is trying to access admin routes
     if (pathname.startsWith('/admin')) {

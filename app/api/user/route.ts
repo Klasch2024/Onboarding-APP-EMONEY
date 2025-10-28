@@ -8,13 +8,22 @@ export async function GET(request: NextRequest) {
     const cookieToken = request.cookies.get('whop-token')?.value;
     const token = authHeader?.replace('Bearer ', '') || cookieToken;
     
+    console.log('API Debug - Auth header:', authHeader ? 'Present' : 'Missing');
+    console.log('API Debug - Cookie token:', cookieToken ? 'Present' : 'Missing');
+    console.log('API Debug - Final token:', token ? 'Present' : 'Missing');
+    
     if (!token) {
       return NextResponse.json({
         token: 'Not Found',
         userId: null,
         isAdmin: false,
         accessLevel: 'no_access',
-        error: 'No token provided'
+        error: 'No token provided',
+        debug: {
+          authHeader: authHeader ? 'Present' : 'Missing',
+          cookieToken: cookieToken ? 'Present' : 'Missing',
+          cookies: Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value]))
+        }
       });
     }
 
