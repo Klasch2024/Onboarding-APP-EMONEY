@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
                     companyId
                   });
 
-                // Only allow users with admin access
+                // Only allow users with admin access to admin routes
                 if (accessCheck.accessLevel !== 'admin') {
                   return NextResponse.redirect(new URL('/', request.url));
                 }
@@ -82,6 +82,9 @@ export async function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/', request.url));
               }
             }
+
+            // For all other routes (including root), allow access regardless of admin status
+            // The page component will handle showing appropriate content based on access level
 
     return NextResponse.next();
   } catch (error) {

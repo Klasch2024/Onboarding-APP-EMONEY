@@ -49,7 +49,7 @@ export default function Layout({ children, accessLevel = 'customer', userId }: L
 
   const tabs = [
     { id: 'preview', label: 'Onboarding Preview' },
-    { id: 'builder', label: 'Onboarding Builder' }
+    ...(isAdmin ? [{ id: 'builder', label: 'Onboarding Builder' }] : [])
   ] as const;
 
   return (

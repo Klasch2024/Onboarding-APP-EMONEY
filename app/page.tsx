@@ -53,21 +53,14 @@ export default async function Page() {
 
     // Conditional rendering based on access level
     if (accessLevel === 'admin') {
-      // Admin: Show full access (already handled by ClientPage)
+      // Admin: Show full access (admin dashboard + onboarding page)
       return <ClientPage accessLevel={accessLevel} userId={userId} />;
     } else if (accessLevel === 'customer') {
-      // Customer: Show onboarding page only
+      // Customer: Show onboarding page only (no admin dashboard)
       return <ClientPage accessLevel={accessLevel} userId={userId} />;
     } else {
-      // No access: Show access denied
-      return (
-        <div className="min-h-screen bg-[#111111] text-white flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
-            <p className="text-gray-400">You don't have access to this application.</p>
-          </div>
-        </div>
-      );
+      // No access: Show onboarding page as default (don't deny access completely)
+      return <ClientPage accessLevel="customer" userId={userId} />;
     }
   } catch (error) {
     console.error('Auth error:', error);

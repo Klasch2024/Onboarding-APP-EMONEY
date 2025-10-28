@@ -8,6 +8,7 @@ import PreviewScreen from '@/components/onboarding/PreviewScreen';
 import { useOnboardingStore } from '@/lib/admin/store';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useEffect } from 'react';
 
 interface ClientPageProps {
   accessLevel?: 'admin' | 'customer' | 'no_access';
@@ -15,8 +16,15 @@ interface ClientPageProps {
 }
 
 export default function ClientPage({ accessLevel = 'customer', userId }: ClientPageProps) {
-  const { activeTab } = useOnboardingStore();
+  const { activeTab, setActiveTab } = useOnboardingStore();
   const isAdmin = accessLevel === 'admin';
+
+  // Ensure non-admin users can only see preview
+  useEffect(() => {
+    if (!isAdmin && activeTab === 'builder') {
+      setActiveTab('preview');
+    }
+  }, [isAdmin, activeTab, setActiveTab]);
 
   return (
     <Layout accessLevel={accessLevel} userId={userId}>
