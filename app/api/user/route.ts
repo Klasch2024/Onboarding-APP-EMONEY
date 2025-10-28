@@ -3,14 +3,18 @@ import { whopSdk } from '@/lib/shared/whop-sdk';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get token from headers or cookies
+    // Get token from headers or cookies - Whop uses x-whop-user-token header
     const authHeader = request.headers.get('authorization');
+    const whopToken = request.headers.get('x-whop-user-token');
     const cookieToken = request.cookies.get('whop-token')?.value;
-    const token = authHeader?.replace('Bearer ', '') || cookieToken;
+    const token = whopToken || authHeader?.replace('Bearer ', '') || cookieToken;
     
     console.log('API Debug - Auth header:', authHeader ? 'Present' : 'Missing');
+    console.log('API Debug - Whop token header:', whopToken ? 'Present' : 'Missing');
     console.log('API Debug - Cookie token:', cookieToken ? 'Present' : 'Missing');
     console.log('API Debug - Final token:', token ? 'Present' : 'Missing');
+    console.log('API Debug - All headers:', Object.fromEntries(request.headers.entries()));
+    console.log('API Debug - All cookies:', Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value])));
     
     if (!token) {
       return NextResponse.json({
@@ -21,8 +25,10 @@ export async function GET(request: NextRequest) {
         error: 'No token provided',
         debug: {
           authHeader: authHeader ? 'Present' : 'Missing',
+          whopToken: whopToken ? 'Present' : 'Missing',
           cookieToken: cookieToken ? 'Present' : 'Missing',
-          cookies: Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value]))
+          cookies: Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value])),
+          headers: Object.fromEntries(request.headers.entries())
         }
       });
     }

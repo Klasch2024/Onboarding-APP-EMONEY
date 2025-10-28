@@ -24,8 +24,13 @@ export default function Layout({ children, accessLevel = 'customer', userId }: L
         const response = await fetch('/api/user');
         const userData = await response.json();
         
+        // Also fetch detailed debug info
+        const debugResponse = await fetch('/api/debug');
+        const debugData = await debugResponse.json();
+        
         setDebugInfo({
           ...userData,
+          debugData,
           timestamp: new Date().toISOString(),
           pathname: window.location.pathname,
         });
@@ -49,36 +54,46 @@ export default function Layout({ children, accessLevel = 'customer', userId }: L
 
   return (
     <div className="min-h-screen bg-[#111111] text-white">
-      {/* Debug Window */}
-      {showDebug && debugInfo && (
-        <div className="bg-yellow-900 border-b border-yellow-700 px-6 py-2 text-xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <span className="font-semibold text-yellow-300">🔍 DEBUG INFO:</span>
-              <span className="text-yellow-200">
-                Token: {debugInfo.token === 'Found' ? '✅ Found' : '❌ Not Found'}
-              </span>
-              <span className="text-yellow-200">
-                User: {debugInfo.userId ? `✅ ${debugInfo.userId}` : '❌ No User'}
-              </span>
-              <span className="text-yellow-200">
-                Admin: {debugInfo.isAdmin ? '✅ Yes' : '❌ No'}
-              </span>
-              <span className="text-yellow-200">
-                Access: {debugInfo.accessLevel || 'unknown'}
-              </span>
-              <span className="text-yellow-200">Path: {debugInfo.pathname}</span>
-              <span className="text-yellow-200">Time: {new Date(debugInfo.timestamp).toLocaleTimeString()}</span>
-            </div>
-            <button
-              onClick={() => setShowDebug(false)}
-              className="text-yellow-300 hover:text-yellow-100"
-            >
-              ✕ Close
-            </button>
-          </div>
-        </div>
-      )}
+              {/* Debug Window */}
+              {showDebug && debugInfo && (
+                <div className="bg-yellow-900 border-b border-yellow-700 px-6 py-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <span className="font-semibold text-yellow-300">🔍 DEBUG INFO:</span>
+                      <span className="text-yellow-200">
+                        Token: {debugInfo.token === 'Found' ? '✅ Found' : '❌ Not Found'}
+                      </span>
+                      <span className="text-yellow-200">
+                        User: {debugInfo.userId ? `✅ ${debugInfo.userId}` : '❌ No User'}
+                      </span>
+                      <span className="text-yellow-200">
+                        Admin: {debugInfo.isAdmin ? '✅ Yes' : '❌ No'}
+                      </span>
+                      <span className="text-yellow-200">
+                        Access: {debugInfo.accessLevel || 'unknown'}
+                      </span>
+                      <span className="text-yellow-200">Path: {debugInfo.pathname}</span>
+                      <span className="text-yellow-200">Time: {new Date(debugInfo.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <button
+                      onClick={() => setShowDebug(false)}
+                      className="text-yellow-300 hover:text-yellow-100"
+                    >
+                      ✕ Close
+                    </button>
+                  </div>
+                  {debugInfo.debugData && (
+                    <div className="mt-2 text-yellow-200">
+                      <div className="text-xs">
+                        <strong>Tokens:</strong> {JSON.stringify(debugInfo.debugData.tokens)}
+                      </div>
+                      <div className="text-xs">
+                        <strong>Cookies:</strong> {Object.keys(debugInfo.debugData.allCookies).length} found
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
       {/* Top Navigation Bar */}
       <div className="bg-[#111111] border-b border-[#2a2a2a] px-6 py-4">
