@@ -28,23 +28,27 @@ export default async function Page() {
       return <ClientPage />;
     }
 
-    // Check company access for admin role
-    const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
-    let accessLevel = 'customer'; // Default to customer
-    
-    if (companyId) {
-      try {
-        const accessCheck = await whopSdk.access.checkIfUserHasAccessToCompany({
-          userId,
-          companyId
-        });
-        accessLevel = accessCheck.accessLevel;
-      } catch (error) {
-        console.error('Error checking company access:', error);
-        // Default to customer on error
-        accessLevel = 'customer';
-      }
-    }
+            // Check company access for admin role
+            const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
+            let accessLevel = 'customer'; // Default to customer
+            
+            if (companyId) {
+              try {
+                // Use the new SDK pattern with withUser() and withCompany()
+                const accessCheck = await whopSdk
+                  .withUser(userId)
+                  .withCompany(companyId)
+                  .access.checkIfUserHasAccessToCompany({
+                    userId,
+                    companyId
+                  });
+                accessLevel = accessCheck.accessLevel;
+              } catch (error) {
+                console.error('Error checking company access:', error);
+                // Default to customer on error
+                accessLevel = 'customer';
+              }
+            }
 
     // Conditional rendering based on access level
     if (accessLevel === 'admin') {

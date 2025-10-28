@@ -40,23 +40,27 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check admin access
-    const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
-    let accessLevel = 'no_access';
-    let isAdmin = false;
+            // Check admin access
+            const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
+            let accessLevel = 'no_access';
+            let isAdmin = false;
 
-    if (companyId) {
-      try {
-        const accessCheck = await whopSdk.access.checkIfUserHasAccessToCompany({
-          userId,
-          companyId
-        });
-        accessLevel = accessCheck.accessLevel;
-        isAdmin = accessCheck.accessLevel === 'admin';
-      } catch (error) {
-        console.error('Error checking company access:', error);
-      }
-    }
+            if (companyId) {
+              try {
+                // Use the new SDK pattern with withUser() and withCompany()
+                const accessCheck = await whopSdk
+                  .withUser(userId)
+                  .withCompany(companyId)
+                  .access.checkIfUserHasAccessToCompany({
+                    userId,
+                    companyId
+                  });
+                accessLevel = accessCheck.accessLevel;
+                isAdmin = accessCheck.accessLevel === 'admin';
+              } catch (error) {
+                console.error('Error checking company access:', error);
+              }
+            }
 
     return NextResponse.json({
       token: 'Found',

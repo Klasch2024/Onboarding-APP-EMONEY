@@ -22,16 +22,7 @@ export const whopSdk = WhopServerSdk({
 	// This authenticates your app with Whop's API
 	appApiKey: process.env.WHOP_API_KEY ?? "fallback",
 
-	// Agent User ID - OPTIONAL but recommended
-	// This is a Whop user ID that your app can control
-	// Most API requests need to be made on behalf of a user
-	// You can create a dedicated agent user for your app
-	// You can also change this later with the `withUser()` function
-	onBehalfOfUserId: process.env.NEXT_PUBLIC_WHOP_AGENT_USER_ID,
-
-	// Company ID - OPTIONAL but recommended
-	// This is the Whop company ID for your organization
-	// Required for company-related API requests
-	// You can also change this later with the `withCompany()` function
-	companyId: process.env.NEXT_PUBLIC_WHOP_COMPANY_ID,
+	// Note: Following Whop's new permissions model
+	// onBehalfOfUserId and companyId are now handled via withUser() and withCompany() functions
+	// This allows for more flexible permission management
 });

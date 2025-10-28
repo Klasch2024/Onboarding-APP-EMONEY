@@ -47,31 +47,35 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Check if user is trying to access admin routes
-    if (pathname.startsWith('/admin')) {
-      // Check if user has admin access to the company
-      const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
-      
-      if (!companyId) {
-        console.error('WHOP_COMPANY_ID not configured');
-        return NextResponse.redirect(new URL('/', request.url));
-      }
+            // Check if user is trying to access admin routes
+            if (pathname.startsWith('/admin')) {
+              // Check if user has admin access to the company
+              const companyId = process.env.NEXT_PUBLIC_WHOP_COMPANY_ID;
+              
+              if (!companyId) {
+                console.error('WHOP_COMPANY_ID not configured');
+                return NextResponse.redirect(new URL('/', request.url));
+              }
 
-      try {
-        const accessCheck = await whopSdk.access.checkIfUserHasAccessToCompany({
-          userId,
-          companyId
-        });
+              try {
+                // Use the new SDK pattern with withUser() and withCompany()
+                const accessCheck = await whopSdk
+                  .withUser(userId)
+                  .withCompany(companyId)
+                  .access.checkIfUserHasAccessToCompany({
+                    userId,
+                    companyId
+                  });
 
-        // Only allow users with admin access
-        if (accessCheck.accessLevel !== 'admin') {
-          return NextResponse.redirect(new URL('/', request.url));
-        }
-      } catch (error) {
-        console.error('Error checking company access:', error);
-        return NextResponse.redirect(new URL('/', request.url));
-      }
-    }
+                // Only allow users with admin access
+                if (accessCheck.accessLevel !== 'admin') {
+                  return NextResponse.redirect(new URL('/', request.url));
+                }
+              } catch (error) {
+                console.error('Error checking company access:', error);
+                return NextResponse.redirect(new URL('/', request.url));
+              }
+            }
 
     return NextResponse.next();
   } catch (error) {

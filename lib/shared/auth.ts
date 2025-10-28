@@ -39,6 +39,7 @@ export async function verifyUserToken(): Promise<UserVerification> {
     // Set the authorization header for the SDK
     headersList.set('authorization', `Bearer ${token}`);
 
+    // Use the new SDK pattern - verifyUserToken returns UserTokenPayload directly
     const verification = await whopSdk.verifyUserToken(headersList);
 
     if (!verification || !verification.userId) {
@@ -63,10 +64,14 @@ export async function checkAdminAccess(userId: string): Promise<AccessCheck> {
       throw new Error('Company ID not configured');
     }
 
-    const accessCheck = await whopSdk.access.checkIfUserHasAccessToCompany({
-      userId,
-      companyId
-    });
+    // Use the new SDK pattern with withUser() and withCompany()
+    const accessCheck = await whopSdk
+      .withUser(userId)
+      .withCompany(companyId)
+      .access.checkIfUserHasAccessToCompany({
+        userId,
+        companyId
+      });
 
     const hasAccess = accessCheck.accessLevel === 'admin';
     
@@ -85,10 +90,13 @@ export async function checkAdminAccess(userId: string): Promise<AccessCheck> {
  */
 export async function checkExperienceAccess(userId: string, experienceId: string): Promise<AccessCheck> {
   try {
-    const accessCheck = await whopSdk.access.checkIfUserHasAccessToExperience({
-      userId,
-      experienceId
-    });
+    // Use the new SDK pattern with withUser()
+    const accessCheck = await whopSdk
+      .withUser(userId)
+      .access.checkIfUserHasAccessToExperience({
+        userId,
+        experienceId
+      });
 
     const hasAccess = accessCheck.accessLevel !== 'no_access';
     
