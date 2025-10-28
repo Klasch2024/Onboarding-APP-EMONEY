@@ -16,13 +16,7 @@ export default async function Page() {
             // Fetch headers and verify user token - using same pattern as example
             const headersList = await headers();
             
-            console.log('Page Debug - Headers available:', Object.keys(headersList).length);
-            console.log('Page Debug - Authorization header:', headersList.get('authorization') ? 'Present' : 'Missing');
-            console.log('Page Debug - Whop token header:', headersList.get('x-whop-user-token') ? 'Present' : 'Missing');
-            
             const { userId } = await whopSdk.verifyUserToken(headersList);
-            
-            console.log('Page Debug - User ID from SDK:', userId || 'No user ID');
     
     if (!userId) {
       // No authenticated user - show onboarding page as default

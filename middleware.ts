@@ -29,11 +29,6 @@ export async function middleware(request: NextRequest) {
     const cookieToken = request.cookies.get('whop-token')?.value;
     const token = whopToken || authHeader?.replace('Bearer ', '') || cookieToken;
     
-    console.log('Middleware Debug - Auth header:', authHeader ? 'Present' : 'Missing');
-    console.log('Middleware Debug - Whop token header:', whopToken ? 'Present' : 'Missing');
-    console.log('Middleware Debug - Cookie token:', cookieToken ? 'Present' : 'Missing');
-    console.log('Middleware Debug - Final token:', token ? 'Present' : 'Missing');
-    
     if (!token) {
       // No token - allow access to root but redirect admin routes
       if (pathname.startsWith('/admin')) {
