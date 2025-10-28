@@ -47,10 +47,14 @@ export default function Layout({ children, accessLevel = 'customer', userId }: L
     fetchDebugInfo();
   }, []);
 
-  const tabs = [
-    { id: 'preview', label: 'Onboarding Preview' },
-    ...(isAdmin ? [{ id: 'builder', label: 'Onboarding Builder' }] : [])
-  ] as const;
+  const tabs = isAdmin 
+    ? [
+        { id: 'preview' as const, label: 'Onboarding Preview' },
+        { id: 'builder' as const, label: 'Onboarding Builder' }
+      ]
+    : [
+        { id: 'preview' as const, label: 'Onboarding Preview' }
+      ];
 
   return (
     <div className="min-h-screen bg-[#111111] text-white">
