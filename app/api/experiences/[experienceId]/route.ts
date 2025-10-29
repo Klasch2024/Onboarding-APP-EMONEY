@@ -98,21 +98,27 @@ export async function PUT(
 
     // If screens are provided, update them
     if (screens) {
-      // Delete existing screens and components
-      await supabase
-        .from('onboarding_components')
-        .delete()
-        .in('screen_id', 
-          supabase
-            .from('onboarding_screens')
-            .select('id')
-            .eq('experience_id', experienceId)
-        );
-
-      await supabase
+      // First get all screen IDs for this experience
+      const { data: existingScreens } = await supabase
         .from('onboarding_screens')
-        .delete()
+        .select('id')
         .eq('experience_id', experienceId);
+
+      if (existingScreens && existingScreens.length > 0) {
+        const screenIds = existingScreens.map(screen => screen.id);
+        
+        // Delete existing components
+        await supabase
+          .from('onboarding_components')
+          .delete()
+          .in('screen_id', screenIds);
+
+        // Delete existing screens
+        await supabase
+          .from('onboarding_screens')
+          .delete()
+          .eq('experience_id', experienceId);
+      }
 
       // Create new screens and components
       for (let screenIndex = 0; screenIndex < screens.length; screenIndex++) {
