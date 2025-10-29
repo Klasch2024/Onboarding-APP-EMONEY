@@ -5,6 +5,7 @@ import ScreenList from '@/components/admin/ScreenList';
 import Canvas from '@/components/admin/Canvas';
 import ComponentEditor from '@/components/admin/ComponentEditor';
 import PreviewScreen from '@/components/onboarding/PreviewScreen';
+import PublishedPreviewScreen from '@/components/onboarding/PublishedPreviewScreen';
 import { useOnboardingStore } from '@/lib/admin/store';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -38,8 +39,10 @@ export default function ClientPage({ accessLevel = 'customer', userId }: ClientP
           <Canvas />
           <ComponentEditor />
         </DndProvider>
-      ) : (
+      ) : isAdmin ? (
         <PreviewScreen />
+      ) : (
+        <PublishedPreviewScreen />
       )}
     </Layout>
   );
