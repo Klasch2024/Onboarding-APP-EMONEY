@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { OnboardingState, Screen, Component } from '../shared/types';
+import { OnboardingState, Screen, Component, ComponentSettings } from '../shared/types';
 
 interface OnboardingStore extends OnboardingState {
   // Database sync
