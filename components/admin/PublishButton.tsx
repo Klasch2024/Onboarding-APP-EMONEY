@@ -17,24 +17,28 @@ export default function PublishButton() {
   const handlePublish = async () => {
     if (!currentExperienceId) {
       // First save the experience
+      console.log('Saving new experience...');
       const experienceId = await saveExperience('My Onboarding Experience');
+      console.log('Save result:', experienceId);
       if (!experienceId) {
-        alert('Failed to save experience');
+        alert('Failed to save experience. Check console for details.');
         return;
       }
     }
 
     setIsPublishing(true);
     try {
+      console.log('Publishing experience:', currentExperienceId);
       const success = await publishExperience(currentExperienceId!);
+      console.log('Publish result:', success);
       if (success) {
         alert('Experience published successfully! Users can now see your changes.');
       } else {
-        alert('Failed to publish experience');
+        alert('Failed to publish experience. Check console for details.');
       }
     } catch (error) {
       console.error('Publish error:', error);
-      alert('Failed to publish experience');
+      alert('Failed to publish experience. Check console for details.');
     } finally {
       setIsPublishing(false);
     }

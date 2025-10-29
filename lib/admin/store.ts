@@ -255,6 +255,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
           
           const method = state.currentExperienceId ? 'PUT' : 'POST';
           
+          console.log('Saving experience:', { url, method, name, description, screens: state.screens });
+          
           const response = await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
@@ -265,11 +267,17 @@ export const useOnboardingStore = create<OnboardingStore>()(
             })
           });
 
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+
           if (!response.ok) {
-            throw new Error('Failed to save experience');
+            const errorText = await response.text();
+            console.error('Response error:', errorText);
+            throw new Error(`Failed to save experience: ${response.status} ${errorText}`);
           }
 
           const { experience } = await response.json();
+          console.log('Saved experience:', experience);
           
           set({
             currentExperienceId: experience.id,
