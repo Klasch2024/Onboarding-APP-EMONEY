@@ -363,20 +363,20 @@ function getDefaultContent(type: Component['type']) {
   }
 }
 
-function getDefaultSettings(type: Component['type']) {
+function getDefaultSettings(type: Component['type']): ComponentSettings {
   switch (type) {
     case 'heading':
-      return { alignment: 'center', size: 'large' };
+      return { alignment: 'center' as const, size: 'large' as const };
     case 'paragraph':
-      return { alignment: 'left', size: 'medium' };
+      return { alignment: 'left' as const, size: 'medium' as const };
     case 'image':
-      return { alignment: 'center', size: 'medium' };
+      return { alignment: 'center' as const, size: 'medium' as const };
     case 'video':
-      return { alignment: 'center', autoplay: false };
+      return { alignment: 'center' as const, autoplay: false };
     case 'gif':
-      return { alignment: 'center', size: 'medium' };
+      return { alignment: 'center' as const, size: 'medium' as const };
     case 'link':
-      return { alignment: 'center', color: '#4a7fff' };
+      return { alignment: 'center' as const, color: '#4a7fff' };
     default:
       return {};
   }
