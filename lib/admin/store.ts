@@ -3,6 +3,11 @@ import { persist } from 'zustand/middleware';
 import { OnboardingState, Screen, Component } from '../shared/types';
 
 interface OnboardingStore extends OnboardingState {
+  // Database sync
+  currentExperienceId: string | null;
+  isDirty: boolean;
+  isLoading: boolean;
+  
   // Screen management
   addScreen: () => void;
   selectScreen: (screenId: string) => void;
@@ -19,6 +24,12 @@ interface OnboardingStore extends OnboardingState {
   
   // Tab management
   setActiveTab: (tab: OnboardingState['activeTab']) => void;
+  
+  // Database operations
+  loadExperience: (experienceId: string) => Promise<void>;
+  saveExperience: (name: string, description?: string) => Promise<string | null>;
+  publishExperience: (experienceId: string) => Promise<boolean>;
+  createNewExperience: () => void;
   
   // Utility
   getCurrentScreen: () => Screen | null;
@@ -39,6 +50,9 @@ export const useOnboardingStore = create<OnboardingStore>()(
       currentScreenId: 'screen-1',
       selectedComponentId: null,
       activeTab: 'builder',
+      currentExperienceId: null,
+      isDirty: false,
+      isLoading: false,
 
       // Screen management
       addScreen: () => {
@@ -49,7 +63,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
         };
         set((state) => ({
           screens: [...state.screens, newScreen],
-          currentScreenId: newScreen.id
+          currentScreenId: newScreen.id,
+          isDirty: true
         }));
       },
 
@@ -61,7 +76,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
         set((state) => ({
           screens: state.screens.map((screen) =>
             screen.id === screenId ? { ...screen, name } : screen
-          )
+          ),
+          isDirty: true
         }));
       },
 
@@ -77,7 +93,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
         set({
           screens: newScreens,
           currentScreenId: newCurrentScreenId,
-          selectedComponentId: null
+          selectedComponentId: null,
+          isDirty: true
         });
       },
 
@@ -86,7 +103,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
           const newScreens = [...state.screens];
           const [movedScreen] = newScreens.splice(fromIndex, 1);
           newScreens.splice(toIndex, 0, movedScreen);
-          return { screens: newScreens };
+          return { screens: newScreens, isDirty: true };
         });
       },
 
@@ -109,7 +126,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
               ? { ...screen, components: [...screen.components, newComponent] }
               : screen
           ),
-          selectedComponentId: newComponent.id
+          selectedComponentId: newComponent.id,
+          isDirty: true
         }));
       },
 
@@ -120,7 +138,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
             components: screen.components.map((component) =>
               component.id === componentId ? { ...component, ...updates } : component
             )
-          }))
+          })),
+          isDirty: true
         }));
       },
 
@@ -140,7 +159,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
                 }
               : screen
           ),
-          selectedComponentId: state.selectedComponentId === componentId ? null : state.selectedComponentId
+          selectedComponentId: state.selectedComponentId === componentId ? null : state.selectedComponentId,
+          isDirty: true
         }));
       },
 
@@ -166,7 +186,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
                   })()
                 }
               : screen
-          )
+          ),
+          isDirty: true
         }));
       },
 
@@ -184,6 +205,115 @@ export const useOnboardingStore = create<OnboardingStore>()(
         } else {
           set({ activeTab: tab, selectedComponentId: null });
         }
+      },
+
+      // Database operations
+      loadExperience: async (experienceId: string) => {
+        set({ isLoading: true });
+        try {
+          const response = await fetch(`/api/experiences/${experienceId}`);
+          if (!response.ok) {
+            throw new Error('Failed to load experience');
+          }
+          
+          const { experience } = await response.json();
+          
+          // Transform database format to store format
+          const screens = experience.onboarding_screens?.map((screen: any) => ({
+            id: screen.id,
+            name: screen.name,
+            components: screen.onboarding_components?.map((component: any) => ({
+              id: component.id,
+              type: component.type,
+              content: component.content,
+              settings: component.settings
+            })) || []
+          })) || [];
+
+          set({
+            screens: screens.length > 0 ? screens : [{ id: 'screen-1', name: 'Screen 1', components: [] }],
+            currentScreenId: screens[0]?.id || 'screen-1',
+            selectedComponentId: null,
+            currentExperienceId: experienceId,
+            isDirty: false,
+            isLoading: false
+          });
+        } catch (error) {
+          console.error('Error loading experience:', error);
+          set({ isLoading: false });
+        }
+      },
+
+      saveExperience: async (name: string, description?: string) => {
+        const state = get();
+        set({ isLoading: true });
+        
+        try {
+          const url = state.currentExperienceId 
+            ? `/api/experiences/${state.currentExperienceId}`
+            : '/api/experiences';
+          
+          const method = state.currentExperienceId ? 'PUT' : 'POST';
+          
+          const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name,
+              description,
+              screens: state.screens
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to save experience');
+          }
+
+          const { experience } = await response.json();
+          
+          set({
+            currentExperienceId: experience.id,
+            isDirty: false,
+            isLoading: false
+          });
+
+          return experience.id;
+        } catch (error) {
+          console.error('Error saving experience:', error);
+          set({ isLoading: false });
+          return null;
+        }
+      },
+
+      publishExperience: async (experienceId: string) => {
+        set({ isLoading: true });
+        try {
+          const response = await fetch(`/api/experiences/${experienceId}/publish`, {
+            method: 'POST'
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to publish experience');
+          }
+
+          set({ isLoading: false });
+          return true;
+        } catch (error) {
+          console.error('Error publishing experience:', error);
+          set({ isLoading: false });
+          return false;
+        }
+      },
+
+      createNewExperience: () => {
+        set({
+          screens: [{ id: 'screen-1', name: 'Screen 1', components: [] }],
+          currentScreenId: 'screen-1',
+          selectedComponentId: null,
+          currentExperienceId: null,
+          isDirty: false,
+          activeTab: 'builder'
+        });
       },
 
       // Utility functions
@@ -205,7 +335,9 @@ export const useOnboardingStore = create<OnboardingStore>()(
       name: 'onboarding-store',
       partialize: (state) => ({
         screens: state.screens,
-        currentScreenId: state.currentScreenId
+        currentScreenId: state.currentScreenId,
+        currentExperienceId: state.currentExperienceId,
+        isDirty: state.isDirty
       })
     }
   )
@@ -215,31 +347,37 @@ export const useOnboardingStore = create<OnboardingStore>()(
 function getDefaultContent(type: Component['type']) {
   switch (type) {
     case 'heading':
-      return { text: 'Heading' };
+      return { text: 'New Heading' };
     case 'paragraph':
-      return { text: 'Add your text here...' };
+      return { text: 'New paragraph text...' };
     case 'image':
       return { imageUrl: '' };
     case 'video':
-      return { videoUrl: '' };
+      return { videoUrl: '', videoEmbedUrl: '' };
     case 'gif':
       return { gifUrl: '' };
     case 'link':
-      return { buttonText: 'Button Text', linkUrl: 'https://example.com' };
+      return { buttonText: 'Click Here', linkUrl: '' };
     default:
       return {};
   }
 }
 
 function getDefaultSettings(type: Component['type']) {
-  const baseSettings = { alignment: 'left' as const };
-  
   switch (type) {
+    case 'heading':
+      return { alignment: 'center', size: 'large' };
+    case 'paragraph':
+      return { alignment: 'left', size: 'medium' };
+    case 'image':
+      return { alignment: 'center', size: 'medium' };
     case 'video':
-      return { ...baseSettings, autoplay: false };
+      return { alignment: 'center', autoplay: false };
+    case 'gif':
+      return { alignment: 'center', size: 'medium' };
     case 'link':
-      return { ...baseSettings, size: 'medium' as const };
+      return { alignment: 'center', color: '#4a7fff' };
     default:
-      return baseSettings;
+      return {};
   }
 }
