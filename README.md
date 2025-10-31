@@ -45,8 +45,23 @@ Required variables:
 - `NEXT_PUBLIC_WHOP_AGENT_USER_ID` - Agent user ID
 - `NEXT_PUBLIC_WHOP_APP_ID` - Your app ID
 - `NEXT_PUBLIC_WHOP_COMPANY_ID` - Your company ID
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon key
+- `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key (get from Supabase dashboard → Settings → API)
 
-### 4. Run the Development Server
+### 4. Set Up Supabase
+
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Run the SQL schema from `supabase-schema-fixed.sql` in your Supabase SQL Editor
+3. Get your Supabase credentials:
+   - Project URL: Settings → API → Project URL
+   - Anon Key: Settings → API → Project API keys → `anon` `public`
+   - Service Role Key: Settings → API → Project API keys → `service_role` (keep secret!)
+4. Add them to your `.env.local` file
+
+See `SUPABASE_SETUP.md` for detailed instructions.
+
+### 5. Run the Development Server
 
 ```bash
 pnpm dev
@@ -54,7 +69,7 @@ pnpm dev
 
 The app will be available at `http://localhost:3000`
 
-### 5. Install Your App
+### 6. Install Your App
 
 1. Go to a Whop in your organization
 2. Navigate to the Tools section
