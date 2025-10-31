@@ -40,10 +40,29 @@ export default function PublishedPreviewScreen() {
       if (response.ok) {
         const { experiences } = await response.json();
         // Find the first published experience
-        const publishedExperience = experiences.find((exp: any) => exp.is_published);
+        // If user is not authenticated, API already filters to published only
+        const publishedExperience = Array.isArray(experiences) 
+          ? experiences.find((exp: any) => exp.is_published) || experiences[0]
+          : null;
+        
         if (publishedExperience) {
-          setExperience(publishedExperience);
+          // Ensure screens are sorted by order_index
+          const sortedScreens = publishedExperience.onboarding_screens
+            ?.sort((a: any, b: any) => a.order_index - b.order_index)
+            .map((screen: any) => ({
+              ...screen,
+              onboarding_components: screen.onboarding_components
+                ?.sort((a: any, b: any) => a.order_index - b.order_index)
+            })) || [];
+          
+          setExperience({
+            ...publishedExperience,
+            onboarding_screens: sortedScreens
+          });
         }
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Failed to load experiences:', errorData);
       }
     } catch (error) {
       console.error('Error loading published experience:', error);

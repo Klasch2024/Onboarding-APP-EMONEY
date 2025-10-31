@@ -36,7 +36,12 @@ export async function POST(
 
     if (error) {
       console.error('Error publishing experience:', error);
-      return NextResponse.json({ error: 'Failed to publish experience' }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Failed to publish experience',
+        details: error.message,
+        code: error.code,
+        hint: error.hint
+      }, { status: 500 });
     }
 
     return NextResponse.json({ experience });

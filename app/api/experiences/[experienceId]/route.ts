@@ -144,15 +144,20 @@ export async function PUT(
           for (let componentIndex = 0; componentIndex < screen.components.length; componentIndex++) {
             const component = screen.components[componentIndex];
             
-            await supabase
+            const { error: componentError } = await supabase
               .from('onboarding_components')
               .insert({
                 screen_id: dbScreen.id,
                 type: component.type,
-                content: component.content,
-                settings: component.settings,
+                content: component.content || {},
+                settings: component.settings || {},
                 order_index: componentIndex
               });
+
+            if (componentError) {
+              console.error(`Error creating component ${componentIndex} for screen ${screenIndex}:`, componentError);
+              // Continue with other components even if one fails
+            }
           }
         }
       }
