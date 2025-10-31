@@ -271,9 +271,10 @@ export const useOnboardingStore = create<OnboardingStore>()(
           console.log('Response ok:', response.ok);
 
           if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Response error:', errorText);
-            throw new Error(`Failed to save experience: ${response.status} ${errorText}`);
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Response error:', errorData);
+            const errorMessage = errorData.details || errorData.error || 'Unknown error';
+            throw new Error(`Failed to save experience: ${errorMessage}`);
           }
 
           const { experience } = await response.json();

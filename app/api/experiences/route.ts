@@ -44,6 +44,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check Supabase configuration
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('Supabase not configured. Missing environment variables.');
+      return NextResponse.json({ 
+        error: 'Database not configured. Please set up Supabase.', 
+        details: 'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY'
+      }, { status: 500 });
+    }
+
     // Get current user and company
     const { userId } = await whopSdk.verifyUserToken(request.headers);
     if (!userId) {
@@ -57,6 +66,8 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { name, description, screens } = body;
+
+    console.log('Creating experience with:', { name, description, screensCount: screens?.length });
 
     const supabase = createServerClient();
 
@@ -75,7 +86,12 @@ export async function POST(request: NextRequest) {
 
     if (experienceError) {
       console.error('Error creating experience:', experienceError);
-      return NextResponse.json({ error: 'Failed to create experience' }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Failed to create experience', 
+        details: experienceError.message,
+        code: experienceError.code,
+        hint: experienceError.hint
+      }, { status: 500 });
     }
 
     // Create screens and components
@@ -120,6 +136,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ experience });
   } catch (error) {
     console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: errorMessage,
+      stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+    }, { status: 500 });
   }
 }
