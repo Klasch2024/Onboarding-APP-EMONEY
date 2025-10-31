@@ -96,7 +96,7 @@ export default function ComponentWrapper({
   return (
     <motion.div
       ref={dragRef}
-      initial={{ opacity: 0, y: 20 }}
+      initial={false}
       animate={{ 
         opacity: isDragging ? 0.5 : 1, 
         y: 0,

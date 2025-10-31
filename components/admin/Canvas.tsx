@@ -3,7 +3,7 @@
 import { useOnboardingStore } from '@/lib/admin/store';
 import { cn } from '@/lib/shared/utils';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ComponentPicker from './ComponentPicker';
 import HeadingComponent from '../shared/HeadingComponent';
@@ -22,9 +22,15 @@ export default function Canvas() {
   } = useOnboardingStore();
   
   const [showComponentPicker, setShowComponentPicker] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   const currentScreen = getCurrentScreen();
-  const components = currentScreen?.components || [];
+  const components = isMounted ? (currentScreen?.components || []) : [];
 
   const handleAddComponent = (type: any) => {
     addComponent(type);
@@ -79,24 +85,22 @@ export default function Canvas() {
         ) : (
                /* Components List */
                <div className="max-w-2xl mx-auto space-y-12">
-                 <AnimatePresence>
-                   {components.map((component, index) => (
-                     <motion.div
-                       key={component.id}
-                       initial={{ opacity: 0, y: 20 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       exit={{ opacity: 0, y: -20 }}
-                       transition={{ duration: 0.2, delay: index * 0.1 }}
-                     >
-                       {renderComponent(component, index)}
-                     </motion.div>
-                   ))}
-                 </AnimatePresence>
+                 {components.map((component, index) => (
+                   <motion.div
+                     key={component.id}
+                     initial={false}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: -20 }}
+                     transition={{ duration: 0.2, delay: index * 0.1 }}
+                   >
+                     {renderComponent(component, index)}
+                   </motion.div>
+                 ))}
             
             {/* Add Component Button */}
             <motion.div 
               className="flex justify-center pt-4"
-              initial={{ opacity: 0 }}
+              initial={false}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
